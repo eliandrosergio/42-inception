@@ -1,60 +1,80 @@
-version: "3.5"
-
-volumes:
-  wordpress:
-    driver: local
-    driver_opts:
-      device: /home/elian/data/wordpress  # Ajuste o caminho para o seu ambiente
-      o: bind
-      type: none
-  mariadb:
-    driver: local
-    driver_opts:
-      device: /home/elian/data/mariadb  # Ajuste o caminho para o seu ambiente
-      o: bind
-      type: none
-
-networks:
-  inception:  # Removida a propriedade 'name'
+version: '3.3'
 
 services:
-  nginx:
-    container_name: nginx
-    build: ./requirements/nginx/.
-    image: nginx:42
-    ports:
-      - "443:443"
-    depends_on:
-      - wordpress
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb:inception
+    container_name: mariadb
+    restart: unless-stopped
     volumes:
-      - wordpress:/var/www/html
+      - db_data:/var/lib/mysql
     networks:
-      - inception
-    env_file:
-      - .env
-    restart: always
+      - inception_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    expose:
+      - "3306"
+
   wordpress:
+    build: ./requirements/wordpress
+    image: wordpress:inception
     container_name: wordpress
-    build: ./requirements/wordpress/.
-    image: wordpress:42
+    restart: unless-stopped
+    volumes:
+      - wp_data:/var/www/html
+    networks:
+      - inception_network
     depends_on:
       - mariadb
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_NAME=${DB_NAME}
+      - WORDPRESS_DB_USER=${DB_USER}
+      - WORDPRESS_DB_PASSWORD=${DB_PASSWORD}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_USER=${WP_USER}
+      - WP_PASSWORD=${WP_PASSWORD}
+      - WP_EMAIL=${WP_EMAIL}
+      - WP_TITLE=${WP_TITLE}
+      - WP_URL=${WP_URL}
+    expose:
+      - "9000"
+
+  nginx:
+    build: ./requirements/nginx
+    image: nginx:inception
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "443:443"
     volumes:
-      - wordpress:/var/www/html
-    env_file:
-      - .env
+      - wp_data:/var/www/html
     networks:
-      - inception
-    restart: always
-  mariadb:
-    container_name: mariadb
-    build: ./requirements/mariadb/.
-    image: mariadb:42
-    volumes:
-      - mariadb:/var/lib/mysql
-    env_file:
-      - .env
-    networks:
-      - inception
-    restart: always
-    
+      - inception_network
+    depends_on:
+      - wordpress
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+
+volumes:
+  wp_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/elian/data/wordpress
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/elian/data/database
+
+networks:
+  inception_network:
+    driver: bridge

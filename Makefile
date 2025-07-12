@@ -1,18 +1,26 @@
-all : up
+# Makefile para o projeto Inception
 
-up : 
+all: build up
+
+build:
+	@mkdir -p /home/$(USER)/data/wordpress
+	@mkdir -p /home/$(USER)/data/database
+	@docker-compose -f ./srcs/docker-compose.yml build
+
+up:
 	@docker-compose -f ./srcs/docker-compose.yml up -d
 
-down : 
+down:
 	@docker-compose -f ./srcs/docker-compose.yml down
 
-stop : 
-	@docker-compose -f ./srcs/docker-compose.yml stop
+clean:
+	@docker-compose -f ./srcs/docker-compose.yml down -v
+	@docker system prune -f
 
-start : 
-	@docker-compose -f ./srcs/docker-compose.yml start
+fclean: clean
+	@rm -rf /home/$(USER)/data/wordpress/*
+	@rm -rf /home/$(USER)/data/database/*
 
-status : 
-	@docker ps
+re: fclean all
 
-.PHONY: all up down stop start status
+.PHONY: all build up down clean fclean re
