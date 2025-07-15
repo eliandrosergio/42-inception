@@ -10,7 +10,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     # Ler as passwords dos secrets
     MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
     MYSQL_PASSWORD=$(cat /run/secrets/db_password)
-    
+
     # Iniciar o MariaDB temporariamente
     mysqld --user=mysql --bootstrap --verbose=0 --skip-name-resolve --skip-networking=0 <<EOF
 USE mysql;
@@ -33,3 +33,4 @@ fi
 
 # Executar o comando passado como parâmetro
 exec "$@"
+

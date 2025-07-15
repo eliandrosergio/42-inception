@@ -8,8 +8,8 @@ echo ""
 # Definir variáveis de conexão
 DB_HOST="mariadb"
 DB_PORT="3306"
-DB_NAME="wordpress_db"
-DB_USER="wp_user"
+DB_NAME="wordpress"
+DB_USER="db_efaustin"
 
 echo "Conectando ao servidor MariaDB..."
 echo "Host: $DB_HOST"

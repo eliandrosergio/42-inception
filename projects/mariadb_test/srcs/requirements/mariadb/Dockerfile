@@ -28,6 +28,5 @@ EXPOSE 3306
 USER mysql
 
 # Comando para iniciar o MariaDB
-ENTRYPOINT ["/usr/local/bin/mariadb_init.sh"]
-CMD ["mysqld"]
+CMD ["/usr/local/bin/mariadb_init.sh && mysqld && tail -f /dev/null"]
 
