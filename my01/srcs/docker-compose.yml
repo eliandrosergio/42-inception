@@ -35,7 +35,8 @@ services:
     volumes:
       - wordpress:/var/www/wordpress
     ports:
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     restart: on-failure
     networks:
       - inception
@@ -48,11 +49,11 @@ volumes:
   mariadb:
     driver_opts:
       type: none
-      device: /home/efaustin/Downloads/inception/srcs/efaustin/data2/mysql
+      device: /workspaces/42-inception/efaustin/data
       o: bind
   wordpress:
     driver_opts:
       type: none
-      device: /home/efaustin/Downloads/inception/srcs/efaustin/data2/html
+      device: /workspaces/42-inception/efaustin/data
       o: bind
 

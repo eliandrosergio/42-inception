@@ -5,7 +5,7 @@ sed -i 's|PHP_PORT|'${PHP_PORT}'|g' /etc/php/7.4/fpm/pool.d/www.conf
 if [ -f "/var/www/wordpress/wp-config.php" ]
 
 then
-  echo "Wordpress already confiured."
+  echo "Wordpress already configured."
 
 else
   wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
