@@ -14,3 +14,5 @@ start :
 
 status : 
 	@docker ps
+
+re : down up
