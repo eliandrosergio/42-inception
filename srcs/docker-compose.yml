@@ -28,10 +28,11 @@ services:
     image: clientdb:inception
     container_name: clientdb
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - inception_network
-    command: bash -c "mysql -h mariadb -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME}"
+    command: tail -f /dev/null
 
 volumes:
   db-data:

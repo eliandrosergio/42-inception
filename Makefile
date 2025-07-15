@@ -3,8 +3,8 @@
 all: build up
 
 build:
-	@mkdir -p /home/$(USER)/data/wordpress
-	@mkdir -p /home/$(USER)/data/database
+	#@mkdir -p /home/$(USER)/data/wordpress
+	#@mkdir -p /home/$(USER)/data/database
 	@docker-compose -f ./srcs/docker-compose.yml build
 
 up:
@@ -18,8 +18,8 @@ clean:
 	@docker system prune -f
 
 fclean: clean
-	@rm -rf /home/$(USER)/data/wordpress/*
-	@rm -rf /home/$(USER)/data/database/*
+	#@rm -rf /home/$(USER)/data/wordpress/*
+	#@rm -rf /home/$(USER)/data/database/*
 
 re: fclean all
 
