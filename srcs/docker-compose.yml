@@ -1,0 +1,46 @@
+version: '3.3'
+
+services:
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb:inception
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - inception_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  client:
+    build: ./requirements/clientdb
+    image: clientdb:inception
+    container_name: clientdb
+    depends_on:
+      - mariadb
+    networks:
+      - inception_network
+    command: bash -c "mysql -h mariadb -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME}"
+
+volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/efaustin/data/database
+
+networks:
+  inception_network:
+    driver: bridge
