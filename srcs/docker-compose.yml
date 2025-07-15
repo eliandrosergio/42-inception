@@ -17,19 +17,13 @@ services:
       - db-data:/var/lib/mysql
     networks:
       - inception_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   client:
     build: ./requirements/clientdb
     image: clientdb:inception
     container_name: clientdb
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
     networks:
       - inception_network
     command: tail -f /dev/null
