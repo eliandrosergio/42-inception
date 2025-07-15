@@ -2,7 +2,7 @@
 
 sed -i 's|PHP_PORT|'${PHP_PORT}'|g' /etc/php/7.4/fpm/pool.d/www.conf
 
-if [ -f "/var/www/html/wordpress/wp-config.php" ]
+if [ -f "/var/www/wordpress/wp-config.php" ]
 
 then
   echo "Wordpress already confiured."
@@ -19,4 +19,4 @@ else
 
 fi
 
-/usr/sbin/php-fpm7.3 -F
+/usr/sbin/php-fpm7.4 -F
