@@ -1,6 +1,6 @@
 version: '3.3'
 
-volume:
+volumes:
 	mariadb:
 		name: mariadb
 		driver: local
