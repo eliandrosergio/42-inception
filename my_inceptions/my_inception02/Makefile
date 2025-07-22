@@ -1,4 +1,4 @@
-EC			=	echo -e
+EC			=	echo
 DOC			=	docker
 RMD			=	rm -rf
 MKD			=	mkdir -p
