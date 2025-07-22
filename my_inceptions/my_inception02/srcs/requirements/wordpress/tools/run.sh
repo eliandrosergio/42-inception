@@ -24,7 +24,7 @@ chmod +x wp-cli.phar
 mv wp-cli.phar /usr/local/bin/wp
 
 # baixa a versão mais recente do WordPress para o diretório atual. A opção --allow-root permite que o comando seja executado como usuário root, o que é necessário se você estiver logado como usuário root ou se estiver usando o WP-CLI com uma instalação do WordPress em nível de sistema.
-wp core download --allow-root
+wp core download --locale=pt_BR --allow-root
 mv /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
 
 # altere essas linhas no arquivo wp-config.php para conectar com o banco de dados, e para conectar com o mariadb
