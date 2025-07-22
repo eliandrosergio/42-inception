@@ -1,6 +1,6 @@
 #---------- MARIADB ----------
 
-FROM    debian:bullseye-slim
+FROM debian:bullseye-slim
 
 RUN     apt-get update -yq && \
         apt-get upgrade -y && \

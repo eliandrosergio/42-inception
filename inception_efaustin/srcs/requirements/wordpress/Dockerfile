@@ -1,8 +1,8 @@
 #---------- WORDPRESS ----------
 
-FROM	debian:bullseye-slim
+FROM debian:bullseye-slim
 
-RUN     apt update -y && \
+RUN     apt-get update -y && \
         apt-get upgrade -y && \
         apt-get install -y php \
         php7.4-mysql \

@@ -1,9 +1,0 @@
-FROM	debian:bullseye-slim
-
-RUN		apt update -y && \
-		apt install wget -y && \
-		apt install php php-mysql  -y
-
-COPY	./tools/run.sh /
-
-CMD	["/run.sh"]

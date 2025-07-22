@@ -1,4 +1,6 @@
-FROM	debian:bullseye-slim
+#---------- FAIL2BAN ----------
+
+FROM debian:bullseye-slim
 
 # Instalar dependências necessárias
 RUN		apt-get update && \

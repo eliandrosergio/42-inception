@@ -1,5 +1,21 @@
 version: '3.3'
 
+volumes:
+  mariadb:
+    driver_opts:
+      type: none
+      device: /home/elian/data/mariadb
+      o: bind
+  wordpress:
+    driver_opts:
+      type: none
+      device: /home/elian/data/wordpress
+      o: bind
+
+networks:
+  inception:
+    driver: bridge
+
 services:
   mariadb:
     build: ./requirements/mariadb
@@ -40,18 +56,39 @@ services:
     networks:
       - inception
 
-networks:
-  inception:
-    driver: bridge
+  redis:
+    build: ./requirements/bonus/redis
+    image: redis
+    depends_on:
+      - wordpress
+    container_name: redis
+    volumes:
+    - wordpress:/var/www/wordpress
+    restart: on-failure
+    networks:
+      - inception
 
-volumes:
-  mariadb:
-    driver_opts:
-      type: none
-      device: /home/elian/data/mariadb
-      o: bind
-  wordpress:
-    driver_opts:
-      type: none
-      device: /home/elian/data/wordpress
-      o: bind
+  website:
+    build: ./requirements/bonus/website
+    image: website
+    container_name: website
+    ports:
+      - "4444:4444"
+    restart: on-failure
+    networks:
+      - inception
+
+  fail2ban:
+    build: ./requirements/bonus/fail2ban
+    image: fail2ban:latest
+    depends_on:
+      - nginx
+    container_name: fail2ban
+    volumes:
+      - wordpress:/var/www/wordpress:ro
+      - /var/log/nginx:/var/log/nginx:ro
+    network_mode: "host"
+    privileged: true
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
