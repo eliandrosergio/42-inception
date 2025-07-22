@@ -56,18 +56,6 @@ services:
     networks:
       - inception
 
-  redis:
-    build: ./requirements/bonus/redis
-    image: redis
-    depends_on:
-      - wordpress
-    container_name: redis
-    volumes:
-    - wordpress:/var/www/wordpress
-    restart: on-failure
-    networks:
-      - inception
-
   website:
     build: ./requirements/bonus/website
     image: website
