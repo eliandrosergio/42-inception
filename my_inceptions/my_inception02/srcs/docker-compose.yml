@@ -118,3 +118,18 @@ services:
 			- "600:80"
 		networks:
 			- inception
+
+	fail2ban:
+		build: ./requirements/bonus/fail2ban
+		container_name: fail2ban
+		image: fail2ban:latest
+		restart: unless-stopped
+		depends_on:
+			- nginx
+		volumes:
+			- wordpress:/var/www/wordpress:ro
+			- /var/log/nginx:/var/log/nginx:ro
+		network_mode: "host"
+		privileged: true
+		cap_add:
+			- NET_ADMIN
