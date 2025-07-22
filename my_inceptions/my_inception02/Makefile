@@ -1,8 +1,8 @@
 EC			=	echo
 DOC			=	docker
-RMD			=	sudo rm -rf
-MKD			=	sudo mkdir -p
-CHM			=	sudo chmod 777
+RMD			=	rm -rf
+MKD			=	mkdir -p
+CHM			=	chmod 777
 DOCCOMP_CMD	=	docker-compose -f ./srcs/docker-compose.yml
 
 all: mkfolder build up
