@@ -1,4 +1,4 @@
-#---------- NGINX ----------
+# NGINX Dockerfile
 
 FROM debian:bullseye-slim
 

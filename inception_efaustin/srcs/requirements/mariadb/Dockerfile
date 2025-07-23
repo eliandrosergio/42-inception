@@ -1,4 +1,4 @@
-#---------- MARIADB ----------
+# MARIADB Dockerfile
 
 FROM debian:bullseye-slim
 

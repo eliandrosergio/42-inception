@@ -16,7 +16,7 @@ banaction = iptables-multiport
 banaction_allports = iptables-allports
 
 # Email de notificação (opcional)
-# destemail = admin@example.com
+# destemail = oficialchucksteel@gmail.com
 # sendername = Fail2Ban
 
 [sshd]

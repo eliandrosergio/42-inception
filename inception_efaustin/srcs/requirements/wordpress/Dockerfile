@@ -1,4 +1,4 @@
-#---------- WORDPRESS ----------
+# WORDPRESS Dockerfile
 
 FROM debian:bullseye-slim
 

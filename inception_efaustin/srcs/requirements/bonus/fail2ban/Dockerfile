@@ -1,4 +1,4 @@
-#---------- FAIL2BAN ----------
+# FAIL2BAN Dockerfile
 
 FROM debian:bullseye-slim
 

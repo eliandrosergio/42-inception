@@ -1,16 +1,14 @@
 #!/bin/sh
 
-sed -i 's|MYSQL_DATABASE|'${MYSQL_DATABASE}'|g' /tmp/init.sql
-sed -i 's|MYSQL_USER|'${MYSQL_USER}'|g' /tmp/init.sql
-sed -i 's|MYSQL_PASSWORD|'${MYSQL_PASSWORD}'|g' /tmp/init.sql
-sed -i 's|MYSQL_ROOT_PASSWORD|'${MYSQL_ROOT_PASSWORD}'|g' /tmp/init.sql
-sed -i 's|MYSQL_PORT|'${MYSQL_PORT}'|g' /etc/mysql/my.cnf
-sed -i 's|MYSQL_ADDRESS|'${MYSQL_ADDRESS}'|g' /etc/mysql/my.cnf
+sed -i 's|DB_NAME|'${DB_NAME}'|g' /tmp/init.sql
+sed -i 's|DB_USER|'${DB_USER}'|g' /tmp/init.sql
+sed -i 's|DB_PASS|'${DB_PASS}'|g' /tmp/init.sql
+sed -i 's|DB_RTPASS|'${DB_RTPASS}'|g' /tmp/init.sql
 
-if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
+if [ -d "/var/lib/mysql/$DB_NAME" ]
 
 then
-  echo "Database already exists."
+  echo "✅ Database existente."
   mysqld_safe
 
 else

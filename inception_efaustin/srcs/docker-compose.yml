@@ -56,6 +56,18 @@ services:
     networks:
       - inception
 
+  adminer:
+     build: ./requirements/bonus/adminer
+     image: adminer
+     depends_on:
+       - mariadb
+     container_name: adminer
+     ports:
+       - "600:80"
+     restart: on-failure
+     networks:
+       - inception
+
   website:
     build: ./requirements/bonus/website
     image: website
@@ -68,7 +80,7 @@ services:
 
   fail2ban:
     build: ./requirements/bonus/fail2ban
-    image: fail2ban:latest
+    image: fail2ban
     depends_on:
       - nginx
     container_name: fail2ban
