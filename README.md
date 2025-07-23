@@ -57,14 +57,32 @@ Construir uma aplicação web completa usando **apenas containers Docker customi
   - Persistência de dados via volumes
   - Configuração de segurança implementada
 
+### 🛢️ **Adminer Container**
+- **Base**: Alpine
+- **Função**: Interface web para gerenciamento do MariaDB
+- **Características**:
+  - Interface leve e intuitiva
+  - Conexão direta com o banco MariaDB
+  - Roda sob proxy do NGINX em HTTPS
+  - Útil para debugging e acesso manual ao banco
+
+### 🎮 **Game Website Container**
+- **Base**: Debian Bullseye Slim
+- **Função**: Hospedagem de um jogo de tiro ao alvo em HTML/CSS/JS com Node.js
+- **Características**:
+  - Servidor Node.js leve (porta interna 4444)
+  - Conteúdo estático e responsivo
+  - Acesso via proxy seguro (NGINX)
+  - Volume dedicado para arquivos do jogo
+
 ## 📂 Estrutura do Projeto
 
 ```
 inception/
-├── Makefile                    # Automação do projeto
+├── Makefile                          # Automação do projeto
 ├── srcs/
-│   ├── docker-compose.yml      # Orquestração dos containers
-│   ├── .env                    # Variáveis de ambiente
+│   ├── docker-compose.yml            # Orquestração dos containers
+│   ├── .env                          # Variáveis de ambiente
 │   └── requirements/
 │       ├── nginx/
 │       │   ├── Dockerfile
@@ -79,14 +97,24 @@ inception/
 │       │   │   └── www.conf
 │       │   └── tools/
 │       │       └── run.sh
-│       └── mariadb/
-│           ├── Dockerfile
-│           ├── conf/
-│           │   ├── my.cnf
-│           │   └── init.sql
-│           └── tools/
-│               └── run.sh
-└── data/                       # Volumes persistentes
+│       ├── mariadb/
+│       │    ├── Dockerfile
+│       │    ├── conf/
+│       │    │   ├── my.cnf
+│       │    │   └── init.sql
+│       │    └── tools/
+│       │        └── run.sh
+│       └── bonus/
+│           ├── adminer
+│           │   ├── Dockerfile/
+│           │   └── tools/
+│           │       └── script.sh
+│           └── website
+│               ├── Dockerfile/
+│               └── tools/
+│                   ├── server.js
+│                   └── public/       # Arquivos do jogo
+└── data/                             # Volumes persistentes
     ├── mariadb/
     └── wordpress/
 ```
@@ -112,6 +140,16 @@ inception/
 - **Makefile** para automação de comandos
 - **Health checks** e restart policies
 - **Logs centralizados** e monitoramento
+
+### 🗃️ **Banco de Dados**
+- Interface de administração com Adminer
+- Uso de volumes persistentes
+- Segurança com variáveis de ambiente e rede isolada
+
+### 🕹️ **Web App Estático com Node.js**
+- Servidor Node.js para conteúdo estático
+- Integração com Docker e proxy reverso
+- Jogo desenvolvido em HTML/CSS/JS puro
 
 ## 🚀 Como Usar
 
@@ -151,7 +189,8 @@ make logs     # Ver logs
 ### Acesso
 - **Website**: https://efaustin.42.fr
 - **WordPress Admin**: https://efaustin.42.fr/wp-admin
-  - User: `wp_efaustin` / Pass: `wp_efaustin2004`
+- **Adminer**: https://efaustin.42.fr:600
+- **Game Website**: https://efaustin.42.fr:4444
 
 ## 📚 Recursos e Referências
 
@@ -190,11 +229,10 @@ make logs     # Ver logs
 
 ## 📈 Possíveis Melhorias (Bonus)
 
-- 🔄 **Redis Cache** - Cache para WordPress
-- 📁 **FTP Server** - Acesso aos arquivos
-- 🌐 **Static Website** - Site adicional
-- 🔧 **Adminer** - Interface para banco de dados
-- 📊 **Monitoring** - Prometheus/Grafana
+- 🔄 **Redis Cache** - Cache para WordPress (bonus)
+- 📁 **FTP Server** - Acesso aos arquivos (bonus)
+- 📊 **Monitoring** - Prometheus/Grafana (bonus extra)
+- 🛡️ **Fail2Ban** - Proteção contra tentativas de login maliciosas (bonus extra)
 
 ## 🤝 Contribuições
 
