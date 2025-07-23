@@ -1,7 +1,7 @@
 #!bin/bash
 
-mkdir /var/www
-mkdir /var/www/adminer
+mkdir -p /var/www
+mkdir -p /var/www/adminer
 
 wget "http://www.adminer.org/latest.php" -O /var/www/adminer/adminer.php
 

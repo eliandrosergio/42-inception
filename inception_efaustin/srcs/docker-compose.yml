@@ -13,12 +13,6 @@ volumes:
       device: /home/elian/data/wordpress
       o: bind
 
-  nginx:
-    driver_opts:
-      type: none
-      device: /home/elian/data/nginx
-      o: bind
-
   adminer:
     driver_opts:
       type: none
@@ -63,7 +57,6 @@ services:
     env_file: .env
     volumes:
       - wordpress:/var/www/wordpress
-      - nginx:/var/log/nginx
     ports:
       - "443:443"
     restart: unless-stopped
@@ -93,16 +86,3 @@ services:
     restart: on-failure
     networks:
       - inception
-
-  fail2ban:
-    build: ./requirements/bonus/fail2ban
-    image: fail2ban
-    depends_on:
-      - nginx
-    container_name: fail2ban
-    volumes:
-      - nginx:/var/log/nginx:ro
-    network_mode: "host"
-    restart: on-failure
-    cap_add:
-      - NET_ADMIN

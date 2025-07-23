@@ -44,7 +44,7 @@ list:
 # Mostrar logs dos serviços
 logs:
 	@echo "Exibindo logs dos serviços..."
-	@cd srcs && $(DOCC) logs mariadb wordpress nginx
+	@cd srcs && $(DOCC) logs mariadb wordpress nginx adminer website
 
 # Alvos que não são arquivos
 .PHONY: all build up start down remove re list logs
