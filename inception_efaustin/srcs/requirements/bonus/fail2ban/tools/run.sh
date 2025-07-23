@@ -34,6 +34,9 @@ fail2ban-client status
 # Manter o container rodando e mostrar logs
 tail -f /var/log/fail2ban/fail2ban.log &
 
+# Usar fail2ban-server em modo foreground
+#exec fail2ban-server -f
+
 # Loop para manter container vivo e mostrar estatísticas
 while true; do
     sleep 300  # 5 minutos

@@ -6,10 +6,23 @@ volumes:
       type: none
       device: /home/elian/data/mariadb
       o: bind
+
   wordpress:
     driver_opts:
       type: none
       device: /home/elian/data/wordpress
+      o: bind
+
+  nginx:
+    driver_opts:
+      type: none
+      device: /home/elian/data/nginx
+      o: bind
+
+  adminer:
+    driver_opts:
+      type: none
+      device: /home/elian/data/adminer
       o: bind
 
 networks:
@@ -24,7 +37,7 @@ services:
     env_file: .env
     volumes:
       - mariadb:/var/lib/mysql
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - inception
 
@@ -37,7 +50,7 @@ services:
     env_file: .env
     volumes:
       - wordpress:/var/www/wordpress
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - inception
 
@@ -50,9 +63,10 @@ services:
     env_file: .env
     volumes:
       - wordpress:/var/www/wordpress
+      - nginx:/var/log/nginx
     ports:
       - "443:443"
-    restart: on-failure
+    restart: unless-stopped
     networks:
       - inception
 
@@ -62,6 +76,8 @@ services:
      depends_on:
        - mariadb
      container_name: adminer
+     volumes:
+      - adminer:/var/www/adminer
      ports:
        - "600:80"
      restart: on-failure
@@ -85,10 +101,8 @@ services:
       - nginx
     container_name: fail2ban
     volumes:
-      - wordpress:/var/www/wordpress:ro
-      - /var/log/nginx:/var/log/nginx:ro
+      - nginx:/var/log/nginx:ro
     network_mode: "host"
-    privileged: true
-    restart: unless-stopped
+    restart: on-failure
     cap_add:
       - NET_ADMIN
