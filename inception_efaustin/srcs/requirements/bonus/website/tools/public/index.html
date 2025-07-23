@@ -1,12 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Olá amigo!</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./imagens/logo-sp.png" type="image/x-icon">
+    <link rel="stylesheet" href="./css/style.css">
+    <title>Tiro ao alvo - by Blazer Stone</title>
 </head>
 <body>
-	<h1>Olá, mundo!</h1>
-	<p>Sou o website estático do efaustin!</p>
+    <header id="cabeca">
+    	<h1>Tiro ao alvo</h1>
+        <p>&copy; JS Puro - by Blazer Stone</p>
+    </header>
+
+    <main id="corpo">
+        <section id="text">
+            <div class="divPontos">
+                <img src="./imagens/pontos.png" alt="pontos" class="imgMini">
+                <p class="pontos item"></p>
+            </div>
+
+            <div class="divTempo">
+                <p class="tempo item"></p>
+                <img src="./imagens/tempo.png" alt="tempo" class="imgMini">
+            </div>
+
+            <div class="divNotificacao">
+                <h4 class="item tituloNotificacao">Área das Notificações</h4>
+                <p class="notificacao item">Seja bem-vindo(a)!</p>
+            </div>
+        </section>
+
+        <section id="arma">
+            <div class="divBalasArma">
+                Munição: <p class="municao item"></p>
+            </div>
+
+            <div class="divButtonArma">
+                <button class="recarregar item">Recarregar</button>
+                <button class="pegarMunicao item">Pegar mais munição</button>
+            </div>
+        </section>
+
+        <section id="img">
+            <div class="mira">
+                <img src="./imagens/mira.png" alt="mira" draggable="false">
+            </div>
+
+            <div class="alvo">
+                <img src="./imagens/alvo.png" alt="alvo">
+            </div>
+        </section>
+    </main>
+    
+    <script src="./js/script.js"></script>
 </body>
 </html>
