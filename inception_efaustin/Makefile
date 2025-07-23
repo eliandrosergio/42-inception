@@ -1,50 +1,94 @@
+# My var(s)
 NAME			=	inception
-DOCC			=	docker-compose
-COMPOSE_FILE	=	./srcs/docker-compose.yml
+EC				=	echo
+RM				=	sudo rm -rf
+MK				=	sudo mkdir -p
 
-# Alvo padrão: construir e iniciar o projeto
-all: build up
+DCK				=	docker
+DCPS			=	docker-compose
+DCPS_CMD		=	$(DCPS) -f ./srcs/docker-compose.yml
 
-# Construir as imagens do Docker
+DT_DIR			=	/home/elian/data
+DB_DIR			=	$(DT_DIR)/mariadb
+WP_DIR			=	$(DT_DIR)/wordpress
+ADMINER_DIR		=	$(DT_DIR)/adminer
+
+
+# Regra para construir e iniciar o projeto
+all: mkfolder build up
+
+# Regras criar os diretórios
+mkfolder:
+	@$(EC) "\nPreparando os diretórios dos volumes..."
+	@$(MK) $(DT_DIR)
+	@$(MK) $(DB_DIR)
+	@$(MK) $(WP_DIR)
+	@$(MK) $(ADMINER_DIR)
+	@$(EC) "Diretórios dos volumes prontas."
+
+# Regras remover os diretórios
+rmfolder:
+	@$(EC) "\nRemovendo os diretórios dos volumes..."
+	@$(RM) $(ADMINER_DIR)
+	@$(RM) $(WP_DIR)
+	@$(RM) $(DB_DIR)
+	@$(RM) $(DT_DIR)
+	@$(EC) "Diretórios dos volumes removidas."
+
+# Regra para construir as imagens do Docker
 build:
-	@echo "Construindo imagens do Docker..."
-	@$(DOCC) -f $(COMPOSE_FILE) build
+	@$(EC) "\nConstruindo imagens do Docker..."
+	@$(DCPS_CMD) build
 
-# Iniciar os serviços em modo detached
+# Regra para iniciar os serviços em modo detached
 up:
-	@echo "Iniciando serviços..."
-	@$(DOCC) -f $(COMPOSE_FILE) up -d
+	@$(EC) "\nIniciando serviços..."
+	@$(DCPS_CMD) up -d
 
-# Iniciar containers parados
-start:
-	@echo "Iniciando containers..."
-	@$(DOCC) -f $(COMPOSE_FILE) start
-
-# Parar e remover os serviços
+# Regra para parar e remover os serviços
 down:
-	@echo "Parando serviços..."
-	@$(DOCC) -f $(COMPOSE_FILE) down
+	@$(EC) "\nParando serviços..."
+	@$(DCPS_CMD) down
 
-# Remover containers e limpar volumes
+# Regra para remover containers e limpar volumes
 remove: down
-	@echo "Removendo containers e volumes..."
-	@docker volume prune -f
-	@docker container prune -f
+	@$(EC) "\nRemovendo containers e volumes..."
+	@$(DCK) volume prune -f
+	@$(DCK) container prune -f
 
-# Reconstruir e reiniciar tudo
+# Regra para parar containers parados
+stop:
+	@$(EC) "\nParando containers..."
+	@$(DCPS_CMD) stop
+
+# Regra para iniciar containers parados
+start:
+	@$(EC) "\nIniciando containers..."
+	@$(DCPS_CMD) start
+
+# Regra para parar e voltar a iniciar os containers
+restart: stop start
+
+# Regra para parar os servicoes e limpa-los
+clean: down remove
+
+# Regra para parar e limpar tudo
+fclean: clean rmfolder
+
+# Regra para reconstruir e reiniciar tudo
 re: remove build up
 
-# Listar containers e imagens
+# Regra para listar containers e imagens
 list:
-	@echo "Listando containers:"
-	@docker ps -a
-	@echo "Listando imagens:"
-	@docker images -a
+	@$(EC) "\nListando containers:"
+	@$(DCK) ps -a
+	@$(EC) "\nListando imagens:"
+	@$(DCK) images -a
 
-# Mostrar logs dos serviços
+# Regra para mostrar logs dos serviços
 logs:
-	@echo "Exibindo logs dos serviços..."
-	@cd srcs && $(DOCC) logs mariadb wordpress nginx adminer website
+	@$(EC) "\nExibindo logs dos serviços..."
+	@cd srcs && $(DCPS) logs mariadb wordpress nginx adminer website
 
 # Alvos que não são arquivos
-.PHONY: all build up start down remove re list logs
+.PHONY: all mkfolder rmfolder build up down remove stop start restart clean fclean re list logs

@@ -11,4 +11,6 @@ chmod 755 /var/www/adminer/adminer.php
 cd /var/www/adminer
 
 rm -rf index.html
+mv adminer.php index.php
+
 php -S 0.0.0.0:80
