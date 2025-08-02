@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Lendo as senhas dos secrets
-DB_PASS=$(cat /run/secrets/db_password)
-DB_RTPASS=$(cat /run/secrets/db_root_password)
+DB_PASS=$(cat /run/secrets/db_pass)
+DB_RTPASS=$(cat /run/secrets/db_root_pass)
 
 # Substituindo as variáveis no arquivo SQL
 sed -i 's|DB_NAME|'${DB_NAME}'|g' /tmp/init.sql

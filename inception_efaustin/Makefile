@@ -1,4 +1,4 @@
--include srcs/.env
+-include .env
 
 # My var(s)
 NAME			=	inception
@@ -33,7 +33,7 @@ mkfolder:
 	@$(CH) 777 $(DB_DIR)
 	@$(CH) 777 $(WP_DIR)
 	@$(CH) 777 $(ADMINER_DIR)
-	@$(EC) "✅ Diretórios dos volumes prontos."
+	@$(EC) "✅ Diretórios dos volumes prontos com permissões."
 
 # Regras remover os diretórios
 rmfolder:
@@ -49,12 +49,12 @@ mksecrets:
 	@$(EC) "\n🔐 Criando arquivos de secrets..."
 	@$(MK) $(SECRETS_DIR)
 	@$(CH) 777 $(SECRETS_DIR)
-	@$(EC) "$(DB_PASS)" > $(SECRETS_DIR)/db_password.txt
-	@$(EC) "$(DB_RTPASS)" > $(SECRETS_DIR)/db_root_password.txt
-	@$(EC) "$(WP_PASS)" > $(SECRETS_DIR)/wp_admin_password.txt
-	@$(EC) "$(WP_PASS2)" > $(SECRETS_DIR)/wp_user_password.txt
-	@$(CH) 600 $(SECRETS_DIR)/*.txt
-	@$(EC) "✅ Arquivos de secrets criados com permissões seguras."
+	@$(EC) "$(DB_PASS)" > $(SECRETS_DIR)/db_pass.txt
+	@$(EC) "$(DB_RTPASS)" > $(SECRETS_DIR)/db_root_pass.txt
+	@$(EC) "$(WP_PASS)" > $(SECRETS_DIR)/wp_editor_pass.txt
+	@$(EC) "$(WP_PASS2)" > $(SECRETS_DIR)/wp_user_pass.txt
+	@$(CH) 777 $(SECRETS_DIR)/*.txt
+	@$(EC) "✅ Arquivos de secrets criados com permissões."
 
 # Regra para remover secrets
 rmsecrets:
