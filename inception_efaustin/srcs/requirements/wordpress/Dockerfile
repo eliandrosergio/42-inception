@@ -1,5 +1,3 @@
-# WORDPRESS Dockerfile
-
 FROM debian:bullseye-slim
 
 RUN     apt-get update -y && \

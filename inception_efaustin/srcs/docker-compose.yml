@@ -14,19 +14,19 @@ volumes:
   mariadb:
     driver_opts:
       type: none
-      device: /home/elian/data/mariadb
+      device: /home/efaustin/data/mariadb
       o: bind
 
   wordpress:
     driver_opts:
       type: none
-      device: /home/elian/data/wordpress
+      device: /home/efaustin/data/wordpress
       o: bind
 
   adminer:
     driver_opts:
       type: none
-      device: /home/elian/data/adminer
+      device: /home/efaustin/data/adminer
       o: bind
 
 networks:
