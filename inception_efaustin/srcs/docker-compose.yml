@@ -1,14 +1,12 @@
 version: '3.3'
 
 secrets:
-  db_pass:
-    file: ../secrets/db_pass.txt
-  db_root_pass:
-    file: ../secrets/db_root_pass.txt
-  wp_editor_pass:
-    file: ../secrets/wp_editor_pass.txt
-  wp_user_pass:
-    file: ../secrets/wp_user_pass.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
 
 volumes:
   mariadb:
@@ -43,8 +41,8 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
     secrets:
-      - db_pass
-      - db_root_pass
+      - db_password
+      - db_root_password
     volumes:
       - mariadb:/var/lib/mysql
     restart: unless-stopped
@@ -67,9 +65,8 @@ services:
       - WP_USER2=${WP_USER2}
       - WP_EMAIL2=${WP_EMAIL2}
     secrets:
-      - db_pass
-      - wp_editor_pass
-      - wp_user_pass
+      - db_password
+      - credentials
     volumes:
       - wordpress:/var/www/wordpress
     restart: unless-stopped

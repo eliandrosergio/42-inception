@@ -5,9 +5,9 @@ then
   echo "✅ Wordpress já se encontra configurado."
 else
   # Lendo as senhas dos secrets
-  DB_PASS=$(cat /run/secrets/db_pass)
-  WP_PASS=$(cat /run/secrets/wp_editor_pass)
-  WP_PASS2=$(cat /run/secrets/wp_user_pass)
+  DB_PASS=$(cat /run/secrets/db_password)
+  WP_PASS=$(grep '^WP_PASS=' /run/secrets/credentials | cut -d'=' -f2-)
+  WP_PASS2=$(grep '^WP_PASS2=' /run/secrets/credentials | cut -d'=' -f2-)
 
   # Instalação e configuração do WordPress
   wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar

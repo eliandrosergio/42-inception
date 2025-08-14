@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bullseye
 
 RUN     apt-get update -yq && \
         apt-get upgrade -y && \
