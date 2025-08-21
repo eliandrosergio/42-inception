@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explicação do Dockerfile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .section {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .code {
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      margin: 10px 0;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Explicação do Dockerfile e Uso do PHP-FPM</h1>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do Dockerfile</h2>
+    <div class="code">
+FROM debian:bookworm
+RUN     apt-get update -y && \
+        apt-get upgrade -y && \
+        apt-get install -y php \
+        php8.2-mysql \
+        php8.2-cli \
+        php8.2-mbstring \
+        php8.2-fpm \
+        php8.2-gettext \
+        mariadb-client \
+        wget && \
+        rm -rf /etc/php/8.2/fpm/pool.d/www.conf && \
+        mkdir -p /run/php
+COPY    ./conf/www.conf /etc/php/8.2/fpm/pool.d/
+COPY    ./tools/run.sh /tmp/
+RUN     chmod +x /tmp/run.sh
+ENTRYPOINT [ "sh", "/tmp/run.sh" ]
+    </div>
+    <ul>
+      <li><strong>FROM debian:bookworm</strong>: Define a imagem base como Debian Bookworm, a versão mais recente estável. No entanto, o subject exige a penúltima versão estável (como Bullseye), então isso precisa ser ajustado para cumprir as regras.</li>
+      <li><strong>RUN apt-get update -y && apt-get upgrade -y</strong>: Atualiza os pacotes do sistema e aplica atualizações para garantir que a imagem base esteja segura e atualizada antes de instalar dependências.</li>
+      <li><strong>RUN apt-get install -y php php8.2-mysql php8.2-cli php8.2-mbstring php8.2-fpm php8.2-gettext mariadb-client wget</strong>: Instala o PHP 7.4 com extensões necessárias (MySQL para conexão com banco de dados, CLI para comandos, mbstring para suporte a caracteres multilingues, FPM para servidor rápido, gettext para internacionalização) e ferramentas como mariadb-client (para interagir com MariaDB) e wget (para downloads).</li>
+      <li><strong>RUN rm -rf /etc/php/8.2/fpm/pool.d/www.conf</strong>: Remove o arquivo de configuração padrão do PHP-FPM para evitar conflitos com a configuração personalizada que será copiada.</li>
+      <li><strong>RUN mkdir -p /run/php</strong>: Cria o diretório /run/php, necessário para o PHP-FPM armazenar sockets ou arquivos de PID, evitando falhas de inicialização.</li>
+      <li><strong>COPY ./conf/www.conf /etc/php/8.2/fpm/pool.d/</strong>: Copia um arquivo de configuração personalizado www.conf para o diretório de pools do PHP-FPM, permitindo ajustes específicos como número de processos ou sockets.</li>
+      <li><strong>COPY ./tools/run.sh /tmp/</strong>: Copia o script run.sh para o diretório /tmp, que será usado como ponto de entrada para iniciar os serviços.</li>
+      <li><strong>RUN chmod +x /tmp/run.sh</strong>: Torna o script run.sh executável, garantindo que o ENTRYPOINT possa rodá-lo sem erros de permissão.</li>
+      <li><strong>ENTRYPOINT [ "sh", "/tmp/run.sh" ]</strong>: Define o script run.sh como o comando principal do contêiner, que deve iniciar o PHP-FPM em foreground para manter o contêiner ativo.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Uso do PHP-FPM no Contêiner do WordPress</h2>
+    <ul>
+      <li>O PHP-FPM (FastCGI Process Manager) é usado no contêiner WordPress para processar scripts PHP de forma eficiente. Ele gerencia pools de processos PHP, permitindo que o WordPress lide com solicitações dinâmicas (como páginas ou posts).</li>
+      <li>De acordo com o subject (página 7), o WordPress deve rodar com php-fpm apenas, sem NGINX no mesmo contêiner, separando responsabilidades entre contêineres.</li>
+      <li>O script run.sh deve iniciar o PHP-FPM com um comando como <code>exec php-fpm8.2</code>, rodando em foreground como PID 1, evitando loops infinitos ou hacks como <code>tail -f</code>, conforme proibido (página 8).</li>
+      <li>O diretório /run/php e o arquivo www.conf personalizado garantem que o PHP-FPM seja configurado corretamente para o WordPress, com sockets ou portas definidas para comunicação com o NGINX.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Uso do PHP-FPM com o Contêiner do NGINX</h2>
+    <ul>
+      <li>O contêiner NGINX atua como o ponto de entrada da infraestrutura (página 8), servindo arquivos estáticos e redirecionando solicitações dinâmicas (como .php) para o contêiner PHP-FPM via FastCGI.</li>
+      <li>O PHP-FPM no contêiner WordPress escuta em um socket (definido em www.conf, por exemplo, /run/php/php-fpm.sock) ou porta, e o NGINX é configurado para se conectar a esse socket/porta usando uma diretiva como <code>fastcgi_pass</code>.</li>
+      <li>Essa separação segue o princípio do subject de usar contêineres dedicados por serviço (página 7), com NGINX apenas na porta 443 (TLSv1.2/TLSv1.3) e PHP-FPM processando o backend do WordPress.</li>
+      <li>Uma rede Docker personalizada (definida no docker-compose.yml) conecta os dois contêineres, permitindo comunicação sem usar <code>network: host</code> ou <code>--link</code>, conforme proibido (página 8).</li>
+    </ul>
+  </div>
+</body>
+</html>

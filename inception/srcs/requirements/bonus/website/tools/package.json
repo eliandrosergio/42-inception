@@ -1,0 +1,15 @@
+{
+  "name": "efaustin-website",
+  "version": "1.0.0",
+  "description": "Portfolio website - Eliandro Sérgio Francisco Faustino",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Eliandro Faustino <eliandrosergio42@gmail.com>",
+  "license": "MIT",
+  "keywords": ["portfolio", "42school", "nodejs", "express"]
+}

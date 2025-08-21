@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explicação dos Arquivos MariaDB</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .section {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .code {
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      margin: 10px 0;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Explicação dos Arquivos do MariaDB</h1>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do my.cnf</h2>
+    <div class="code">
+[mysqld]
+port=3306
+bind-address=0.0.0.0
+    </div>
+    <ul>
+      <li><strong>[mysqld]</strong>: Seção de configuração principal do servidor MariaDB, indicando que as configurações a seguir se aplicam ao daemon mysqld.</li>
+      <li><strong>port=3306</strong>: Define a porta padrão 3306 para o MariaDB, permitindo conexões do WordPress e outras aplicações.</li>
+      <li><strong>bind-address=0.0.0.0</strong>: Configura o MariaDB para aceitar conexões de qualquer endereço de rede, essencial para comunicação entre contêineres em uma rede Docker.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do init.sql</h2>
+    <div class="code">
+CREATE DATABASE IF NOT EXISTS DB_NAME;
+CREATE USER IF NOT EXISTS 'DB_USER'@'%' IDENTIFIED BY 'DB_PASS';
+GRANT ALL PRIVILEGES ON DB_NAME.* TO 'DB_USER'@'%' IDENTIFIED BY 'DB_PASS';
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'DB_RPASS';
+FLUSH PRIVILEGES;
+    </div>
+    <ul>
+      <li><strong>CREATE DATABASE IF NOT EXISTS DB_NAME;</strong>: Cria o banco de dados especificado (substituído por DB_NAME via script) se ele ainda não existir.</li>
+      <li><strong>CREATE USER IF NOT EXISTS 'DB_USER'@'%' IDENTIFIED BY 'DB_PASS';</strong>: Cria um usuário (substituído por DB_USER) com senha (DB_PASS) acessível de qualquer host (%).</li>
+      <li><strong>GRANT ALL PRIVILEGES ON DB_NAME.* TO 'DB_USER'@'%' IDENTIFIED BY 'DB_PASS';</strong>: Concede todas as permissões ao usuário no banco de dados, reforçando a autenticação.</li>
+      <li><strong>ALTER USER 'root'@'localhost' IDENTIFIED BY 'DB_RPASS';</strong>: Altera a senha do usuário root para a especificada (DB_RPASS) para acesso local seguro.</li>
+      <li><strong>FLUSH PRIVILEGES;</strong>: Recarrega as permissões no MariaDB, aplicando as mudanças imediatamente.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do run.sh</h2>
+    <div class="code">
+#!/bin/sh
+
+# Lendo as senhas dos secrets
+DB_PASS=$(cat /run/secrets/db_password)
+DB_RPASS=$(cat /run/secrets/db_root_password)
+
+# Substituindo as variáveis no arquivo SQL
+sed -i 's|DB_NAME|'${DB_NAME}'|g' /tmp/init.sql
+sed -i 's|DB_USER|'${DB_USER}'|g' /tmp/init.sql
+sed -i 's|DB_PASS|'${DB_PASS}'|g' /tmp/init.sql
+sed -i 's|DB_RPASS|'${DB_RPASS}'|g' /tmp/init.sql
+
+if [ -d "/var/lib/mysql/$DB_NAME" ]
+then
+  echo "✅ Database existente."
+else
+  mysql_install_db
+  mysqld --init-file="/tmp/init.sql"
+fi
+
+mysqld --console
+    </div>
+    <ul>
+      <li><strong>#!/bin/sh</strong>: Define o interpretador de shell (sh) para executar o script no contêiner Debian.</li>
+      <li><strong>DB_PASS=$(cat /run/secrets/db_password)</strong>: Lê a senha do banco de dados a partir de um arquivo de segredos, conforme recomendado (página 8).</li>
+      <li><strong>DB_RPASS=$(cat /run/secrets/db_root_password)</strong>: Lê a senha do root do banco de dados do arquivo de segredos.</li>
+      <li><strong>sed -i 's|DB_NAME|'${DB_NAME}'|g' /tmp/init.sql</strong>: Substitui o placeholder DB_NAME no init.sql pelo valor da variável de ambiente.</li>
+      <li><strong>sed -i 's|DB_USER|'${DB_USER}'|g' /tmp/init.sql</strong>: Substitui DB_USER no init.sql.</li>
+      <li><strong>sed -i 's|DB_PASS|'${DB_PASS}'|g' /tmp/init.sql</strong>: Substitui DB_PASS no init.sql.</li>
+      <li><strong>sed -i 's|DB_RPASS|'${DB_RPASS}'|g' /tmp/init.sql</strong>: Substitui DB_RPASS no init.sql.</li>
+      <li><strong>if [ -d "/var/lib/mysql/$DB_NAME" ]</strong>: Verifica se o banco de dados já existe no diretório de dados.</li>
+      <li><strong>then echo "✅ Database existente."</strong>: Exibe mensagem se o banco já estiver configurado.</li>
+      <li><strong>else mysql_install_db</strong>: Inicializa o banco de dados se ele não existir.</li>
+      <li><strong>mysqld --init-file="/tmp/init.sql"</strong>: Executa o init.sql para configurar o banco na primeira inicialização.</li>
+      <li><strong>mysqld --console</strong>: Inicia o MariaDB em foreground como PID 1, atendendo às boas práticas de Docker (página 8).</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do Dockerfile</h2>
+    <div class="code">
+FROM debian:bookworm
+
+RUN     apt-get update -yq && \
+        apt-get upgrade -y && \
+        apt-get install mariadb-server \
+        mariadb-client -y && \
+        mkdir -p /var/run/mysqld && \
+        chown -R mysql:mysql /var/run/mysqld && \
+        chown -R mysql:mysql /etc/mysql/ && \
+        chown -R mysql:mysql /tmp/
+
+COPY    ./tools/run.sh /tmp/
+COPY    ./conf/init.sql /tmp/
+COPY    ./conf/my.cnf /etc/mysql
+
+USER    mysql
+
+ENTRYPOINT ["sh", "/tmp/run.sh"]
+    </div>
+    <ul>
+      <li><strong>FROM debian:bookworm</strong>: Usa Debian Bookworm como base, mas deve ser ajustado para Bullseye (penúltima versão estável, página 7).</li>
+      <li><strong>RUN apt-get update -yq && apt-get upgrade -y</strong>: Atualiza os pacotes para segurança e estabilidade.</li>
+      <li><strong>RUN apt-get install mariadb-server mariadb-client -y</strong>: Instala o servidor e cliente MariaDB.</li>
+      <li><strong>RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld</strong>: Cria e ajusta permissões do diretório para sockets do MariaDB.</li>
+      <li><strong>RUN chown -R mysql:mysql /etc/mysql/ && chown -R mysql:mysql /tmp/</strong>: Garante que os arquivos de configuração e scripts sejam acessíveis ao usuário mysql.</li>
+      <li><strong>COPY ./tools/run.sh /tmp/</strong>: Copia o script de inicialização.</li>
+      <li><strong>COPY ./conf/init.sql /tmp/</strong>: Copia o script de inicialização do banco.</li>
+      <li><strong>COPY ./conf/my.cnf /etc/mysql</strong>: Copia a configuração personalizada do MariaDB.</li>
+      <li><strong>USER mysql</strong>: Muda para o usuário mysql, seguindo boas práticas de segurança.</li>
+      <li><strong>ENTRYPOINT ["sh", "/tmp/run.sh"]</strong>: Define o script como comando principal, iniciando o MariaDB.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Integração com WordPress e NGINX</h2>
+    <ul>
+      <li>O MariaDB fornece o banco de dados para o WordPress, acessado via dbhost=mariadb em uma rede Docker (página 8).</li>
+      <li>O NGINX no contêiner separado se conecta ao PHP-FPM (porta 9000), que interage com o WordPress usando o banco MariaDB.</li>
+    </ul>
+  </div>
+</body>
+</html>

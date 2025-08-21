@@ -1,0 +1,18 @@
+FROM debian:bookworm-slim
+
+RUN     apt-get update -yq && \
+        apt-get upgrade -y && \
+        apt-get install mariadb-server \
+        mariadb-client -y && \
+        mkdir -p /var/run/mysqld && \
+        chown -R mysql:mysql /var/run/mysqld && \
+        chown -R mysql:mysql /etc/mysql/ && \
+        chown -R mysql:mysql /tmp/
+
+COPY    ./tools/run.sh /tmp/
+COPY    ./conf/init.sql /tmp/
+COPY    ./conf/my.cnf /etc/mysql
+
+USER    mysql
+
+ENTRYPOINT ["sh", "/tmp/run.sh"]

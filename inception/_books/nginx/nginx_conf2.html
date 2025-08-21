@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explicação Detalhada do nginx.conf</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .page {
+      background-color: #fff;
+      padding: 20px;
+      margin-bottom: 40px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #3498db;
+    }
+    .code {
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      margin: 10px 0;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Explicação Detalhada do nginx.conf</h1>
+
+  <div class="page">
+    <h2>Página 1: Linhas Alteradas pelo Desenvolvedor</h2>
+    <div class="code">
+## Basic Confs ##
+
+server_tokens off;
+
+## SSL Confs ##
+
+ssl_protocols TLSv1.2 TLSv1.3;
+
+ssl_prefer_server_ciphers on;
+
+ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;
+
+ssl_ecdh_curve secp384r1;
+
+ssl_session_timeout 10m;
+
+ssl_session_cache shared:SSL:10m;
+
+ssl_session_tickets off;
+
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+
+add_header X-Frame-Options DENY;
+
+add_header X-Content-Type-Options nosniff;
+
+add_header X-XSS-Protection "1; mode=block";
+
+## Logging Confs ##
+
+## Gzip Confs ##
+
+gzip on;
+    </div>
+    <ul>
+      <li><strong>## Basic Confs ##</strong>: Comentário adicionado pelo desenvolvedor para organizar as configurações básicas. Não afeta o funcionamento, mas melhora a legibilidade do arquivo, facilitando a manutenção e compreensão do código.</li>
+      <li><strong>server_tokens off;</strong>: Esta diretiva desativa a exibição da versão do NGINX nos cabeçalhos de resposta e páginas de erro. O padrão é "on", onde a versão é mostrada. O desenvolvedor alterou para "off" para aumentar a segurança, tornando mais difícil para atacantes identificar vulnerabilidades específicas da versão do servidor.</li>
+      <li><strong>## SSL Confs ##</strong>: Comentário adicionado para separar as configurações de SSL/TLS. Ajuda na organização, sem impacto funcional, mas facilita a edição futura de configurações relacionadas a segurança.</li>
+      <li><strong>ssl_protocols TLSv1.2 TLSv1.3;</strong>: Especifica os protocolos SSL/TLS permitidos. O padrão inclui versões mais antigas como TLSv1 e TLSv1.1. O desenvolvedor restringiu para TLSv1.2 e TLSv1.3 para cumprir requisitos de segurança modernos, evitando protocolos obsoletos que são vulneráveis a ataques como POODLE.</li>
+      <li><strong>ssl_prefer_server_ciphers on;</strong>: Prioriza as cifras definidas no servidor em vez das preferidas pelo cliente. O padrão é "off". Alterado para "on" para garantir que o servidor use cifras seguras, melhorando o controle sobre a criptografia e reduzindo riscos de downgrade de segurança.</li>
+      <li><strong>ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;</strong>: Define uma lista específica de cifras criptográficas. O padrão usa uma lista mais ampla e menos restritiva. O desenvolvedor selecionou cifras fortes e modernas para aumentar a segurança, focando em algoritmos resistentes a ataques, como os baseados em AES-GCM.</li>
+      <li><strong>ssl_ecdh_curve secp384r1;</strong>: Especifica a curva elíptica para trocas de chaves ECDHE. O padrão é uma curva como prime256v1. Alterado para secp384r1 para usar uma curva mais robusta, oferecendo maior nível de segurança criptográfica contra ataques avançados.</li>
+      <li><strong>ssl_session_timeout 10m;</strong>: Define o tempo de validade de sessões SSL como 10 minutos. O padrão é 5 minutos. O desenvolvedor aumentou para 10 minutos para melhorar o desempenho, permitindo reutilização de sessões por mais tempo e reduzindo a sobrecarga de renegociações.</li>
+      <li><strong>ssl_session_cache shared:SSL:10m;</strong>: Configura um cache compartilhado de sessões SSL de 10 MB. O padrão não inclui cache ou usa um tamanho menor. Adicionado para otimizar conexões repetidas, reduzindo latência ao evitar renegociações frequentes de SSL.</li>
+      <li><strong>ssl_session_tickets off;</strong>: Desativa os tickets de sessão SSL. O padrão é "on". Alterado para "off" para evitar ataques de reutilização de tickets, melhorando a segurança em ambientes onde tickets podem ser explorados.</li>
+      <li><strong>add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";</strong>: Adiciona o cabeçalho HSTS com duração de 2 anos, incluindo subdomínios e pré-carregamento. Não presente por padrão. Inserido para forçar o uso de HTTPS permanentemente, prevenindo downgrades para HTTP e melhorando a segurança contra ataques man-in-the-middle.</li>
+      <li><strong>add_header X-Frame-Options DENY;</strong>: Adiciona cabeçalho para bloquear o carregamento em iframes. Não presente por padrão. Usado para proteger contra ataques de cliquejacking, impedindo que o site seja embutido em frames maliciosos.</li>
+      <li><strong>add_header X-Content-Type-Options nosniff;</strong>: Adiciona cabeçalho para impedir que navegadores adivinhem tipos MIME. Não presente por padrão. Previne ataques baseados em MIME sniffing, como execução de scripts em arquivos maliciosos disfarçados.</li>
+      <li><strong>add_header X-XSS-Protection "1; mode=block";</strong>: Ativa proteção contra XSS nos navegadores. Não presente por padrão. Bloqueia páginas com scripts suspeitos, adicionando uma camada de defesa contra injeções de código cross-site.</li>
+      <li><strong>## Logging Confs ##</strong>: Comentário adicionado para organizar configurações de log. Melhora a legibilidade, sem impacto funcional.</li>
+      <li><strong>## Gzip Confs ##</strong>: Comentário adicionado para organizar configurações de compressão Gzip. Facilita a manutenção do arquivo.</li>
+      <li><strong>gzip on;</strong>: Habilita a compressão Gzip. O padrão é "off". Alterado para "on" para reduzir o tamanho das respostas, melhorando a velocidade de carregamento e economizando largura de banda, especialmente útil para arquivos textuais como HTML, CSS e JS.</li>
+    </ul>
+  </div>
+
+  <div class="page">
+    <h2>Página 2: Linhas Padrão</h2>
+    <div class="code">
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+	worker_connections 768;
+}
+
+http {
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*.conf;
+}
+    </div>
+    <ul>
+      <li><strong>user www-data;</strong>: Define o usuário sob o qual os processos worker do NGINX são executados. No padrão do Debian, é "www-data" para garantir que o servidor rode com privilégios mínimos, melhorando a segurança ao evitar execução como root.</li>
+      <li><strong>worker_processes auto;</strong>: Define o número de processos worker como "auto", permitindo que o NGINX ajuste automaticamente com base no número de núcleos de CPU disponíveis. Isso otimiza o desempenho ao distribuir a carga de trabalho entre múltiplos processos.</li>
+      <li><strong>pid /run/nginx.pid;</strong>: Especifica o caminho do arquivo que armazena o ID do processo principal do NGINX. O padrão é "/run/nginx.pid", usado para gerenciamento do servidor, como parar ou reiniciar o processo.</li>
+      <li><strong>include /etc/nginx/modules-enabled/*.conf;</strong>: Inclui todos os arquivos de configuração de módulos habilitados no diretório /etc/nginx/modules-enabled/. Isso carrega módulos dinâmicos como gzip ou ssl, permitindo extensibilidade sem editar o arquivo principal.</li>
+      <li><strong>events { worker_connections 768; }</strong>: Bloco que configura o gerenciamento de conexões. "worker_connections 768" define o número máximo de conexões simultâneas por processo worker, incluindo conexões de clientes e upstreams. O valor 768 é um padrão comum para equilibrar desempenho e uso de recursos.</li>
+      <li><strong>sendfile on;</strong>: Habilita o uso da chamada de sistema sendfile para transferir arquivos diretamente do disco para a rede, reduzindo o uso de CPU e memória ao evitar cópias desnecessárias de dados no espaço do usuário.</li>
+      <li><strong>tcp_nopush on;</strong>: Ativa o TCP_NOPUSH (em FreeBSD) ou TCP_CORK (em Linux), que otimiza o envio de pacotes ao encher buffers antes de transmitir, reduzindo o overhead de rede especialmente ao usar sendfile para arquivos grandes.</li>
+      <li><strong>tcp_nodelay on;</strong>: Desativa o algoritmo de Nagle, permitindo o envio imediato de pequenos pacotes TCP. Isso melhora a latência em aplicações interativas, como web sockets ou streaming, evitando atrasos na bufferização.</li>
+      <li><strong>keepalive_timeout 65;</strong>: Define o tempo em segundos que uma conexão keep-alive permanece aberta após a última resposta. O valor 65 é padrão para equilibrar o reuso de conexões com a liberação de recursos, reduzindo o overhead de novas conexões TCP.</li>
+      <li><strong>types_hash_max_size 2048;</strong>: Define o tamanho máximo da tabela hash usada para armazenar tipos MIME. O valor 2048 é padrão para otimizar o uso de memória em servidores com muitos tipos de arquivos, melhorando a eficiência de lookups.</li>
+      <li><strong>include /etc/nginx/mime.types;</strong>: Carrega o arquivo mime.types que mapeia extensões de arquivos para tipos MIME. Isso garante que o NGINX envie cabeçalhos Content-Type corretos para arquivos como CSS, JS ou imagens.</li>
+      <li><strong>default_type application/octet-stream;</strong>: Define o tipo MIME padrão para arquivos sem extensão conhecida como binário genérico. Isso previne interpretações erradas pelos navegadores, tratando arquivos desconhecidos como downloads.</li>
+      <li><strong>access_log /var/log/nginx/access.log;</strong>: Configura o arquivo de log para registrar acessos, incluindo IP do cliente, data, requisição, status e mais. O caminho padrão é usado para monitoramento e análise de tráfego.</li>
+      <li><strong>error_log /var/log/nginx/error.log;</strong>: Configura o arquivo de log para erros, como falhas de conexão ou configurações inválidas. O caminho padrão permite depuração e alerta sobre problemas no servidor.</li>
+      <li><strong>include /etc/nginx/conf.d/*.conf;</strong>: Inclui todos os arquivos de configuração adicionais no diretório conf.d, permitindo modularidade para configurações específicas sem alterar o arquivo principal.</li>
+      <li><strong>include /etc/nginx/sites-enabled/*.conf;</strong>: Inclui configurações de sites virtuais habilitados no diretório sites-enabled, permitindo gerenciamento separado de múltiplos domínios ou aplicações.</li>
+    </ul>
+  </div>
+</body>
+</html>

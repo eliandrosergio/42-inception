@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rota PHP no Nginx - Guia Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .route-display {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 30px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 30px 0;
+            position: relative;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .route-display::before {
+            content: 'nginx.conf';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .comment {
+            color: #6272a4;
+            font-style: italic;
+        }
+
+        .keyword {
+            color: #ff79c6;
+        }
+
+        .string {
+            color: #f1fa8c;
+        }
+
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .explanation-item {
+            margin: 15px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .code-inline {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .example {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .example h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-step::after {
+                content: '↓';
+                right: auto;
+                bottom: -25px;
+                top: auto;
+                transform: translateX(-50%);
+                left: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Rota PHP no Nginx</h1>
+            <p>Desvendando o mistério do processamento de arquivos PHP</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2><span class="icon">📝</span>A Rota Completa</h2>
+                <div class="route-display">
+<span class="keyword">location</span> <span class="highlight">~ \.php$</span> {
+    <span class="keyword">try_files</span> <span class="string">$uri =404</span>;
+    <span class="keyword">fastcgi_split_path_info</span> <span class="string">^(.+\.php)(/.+)$</span>;
+    <span class="keyword">fastcgi_pass</span> <span class="string">wordpress:9000</span>;
+    <span class="keyword">fastcgi_index</span> <span class="string">index.php</span>;
+    <span class="keyword">include</span> <span class="string">fastcgi_params</span>;
+    <span class="keyword">fastcgi_param</span> <span class="string">SCRIPT_FILENAME $document_root$fastcgi_script_name</span>;
+    <span class="keyword">fastcgi_param</span> <span class="string">PATH_INFO $fastcgi_path_info</span>;
+}
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">🎯</span>O que é essa rota?</h2>
+                <p>Esta é a configuração que permite ao Nginx processar <strong>todos os arquivos PHP</strong> do seu site. Sem ela, os arquivos PHP seriam baixados como texto em vez de serem executados!</p>
+                
+                <div class="explanation-item">
+                    <strong>Padrão capturado:</strong> <span class="code-inline">location ~ \.php$</span>
+                    <br><br>
+                    <span class="code-inline">~</span> = expressão regular<br>
+                    <span class="code-inline">\.php$</span> = qualquer URL que termine com ".php"<br>
+                    <strong>Exemplos:</strong> index.php, wp-admin.php, adminer.php
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">⚙️</span>Decompondo Cada Linha</h2>
+                
+                <div class="explanation-item">
+                    <h3><span class="code-inline">try_files $uri =404;</span></h3>
+                    <p>✅ <strong>Segurança:</strong> Verifica se o arquivo PHP existe fisicamente</p>
+                    <p>🛡️ <strong>Proteção:</strong> Previne execução de código malicioso</p>
+                    <p>❌ <strong>Se não existir:</strong> Retorna erro 404</p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">fastcgi_split_path_info ^(.+\.php)(/.+)$;</span></h3>
+                    <p>🔀 <strong>Função:</strong> Separa o nome do arquivo dos parâmetros</p>
+                    <p>📝 <strong>Exemplo:</strong> <span class="code-inline">/admin.php/user/123</span> vira:</p>
+                    <p>&nbsp;&nbsp;&nbsp;• Arquivo: <span class="code-inline">admin.php</span></p>
+                    <p>&nbsp;&nbsp;&nbsp;• Path: <span class="code-inline">/user/123</span></p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">fastcgi_pass wordpress:9000;</span></h3>
+                    <p>🚀 <strong>Destino:</strong> Envia requisição para container WordPress</p>
+                    <p>🔌 <strong>Porta:</strong> 9000 (onde roda o PHP-FPM)</p>
+                    <p>⚡ <strong>Processamento:</strong> É aqui que o PHP é executado</p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">fastcgi_index index.php;</span></h3>
+                    <p>📄 <strong>Arquivo padrão:</strong> Define index.php como arquivo principal</p>
+                    <p>🏠 <strong>Quando usado:</strong> Quando não especificado um arquivo</p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">include fastcgi_params;</span></h3>
+                    <p>📦 <strong>Headers:</strong> Inclui parâmetros padrão do FastCGI</p>
+                    <p>🌐 <strong>Conteúdo:</strong> HTTP headers, variáveis de ambiente</p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">fastcgi_param SCRIPT_FILENAME...</span></h3>
+                    <p>📍 <strong>Caminho completo:</strong> Define onde está o arquivo PHP</p>
+                    <p>💾 <strong>Exemplo:</strong> <span class="code-inline">/var/www/wordpress/index.php</span></p>
+                </div>
+
+                <div class="explanation-item">
+                    <h3><span class="code-inline">fastcgi_param PATH_INFO...</span></h3>
+                    <p>🛤️ <strong>URLs bonitas:</strong> Suporte a URLs como <span class="code-inline">/index.php/categoria/post</span></p>
+                    <p>🎨 <strong>WordPress:</strong> Essencial para permalinks</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">🔄</span>Fluxo de Processamento</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <h4>1. Requisição</h4>
+                        <p>Usuário acessa<br><span class="code-inline">site.com/admin.php</span></p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>2. Nginx</h4>
+                        <p>Reconhece padrão<br><span class="code-inline">\.php$</span></p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>3. Verificação</h4>
+                        <p>Arquivo existe?<br>Se não → 404</p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>4. PHP-FPM</h4>
+                        <p>Envia para<br><span class="code-inline">wordpress:9000</span></p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>5. Execução</h4>
+                        <p>PHP processa<br>e retorna HTML</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example">
+                <h3>💡 Exemplo Prático</h3>
+                <p><strong>Acesso:</strong> <span class="code-inline">https://efaustin.42.fr/wp-admin.php</span></p>
+                <p><strong>1.</strong> Nginx encontra <span class="code-inline">/var/www/wordpress/wp-admin.php</span></p>
+                <p><strong>2.</strong> Envia para <span class="code-inline">wordpress:9000</span> (PHP-FPM)</p>
+                <p><strong>3.</strong> PHP-FPM executa o código PHP</p>
+                <p><strong>4.</strong> Retorna HTML para o usuário</p>
+            </div>
+
+            <div class="section">
+                <h2><span class="icon">⚠️</span>Por que é Essencial?</h2>
+                <div class="explanation-item">
+                    <p><strong>❌ Sem esta rota:</strong> Arquivos PHP seriam baixados como arquivos de texto</p>
+                    <p><strong>✅ Com esta rota:</strong> PHP é executado e retorna HTML dinâmico</p>
+                    <p><strong>🏗️ WordPress:</strong> Simplesmente não funcionaria sem esta configuração</p>
+                    <p><strong>🔧 Adminer:</strong> Interface de banco precisa processar PHP</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📚 Este guia explica como o Nginx processa arquivos PHP usando FastCGI</p>
+            <p>🚀 Essencial para WordPress, Adminer e qualquer aplicação PHP</p>
+        </div>
+    </div>
+</body>
+</html>

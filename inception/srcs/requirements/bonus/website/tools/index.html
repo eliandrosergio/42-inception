@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>efaustin Portfolio - 42 School</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 Eliandro Sérgio Francisco Faustino</h1>
+            <p class="subtitle">Full Stack Developer & 42 Angola Student</p>
+            <div class="bio">
+                <p>📅 Nascido em 3 de Outubro de 2004</p>
+                <p>🎓 Estudante da 42 Luanda, Angola</p>
+            </div>
+        </header>
+
+        <main class="main">
+            <section class="about">
+                <h2>📋 Sobre Mim</h2>
+                <p>
+                    Sou o <strong>Eliandro Sérgio Francisco Faustino</strong>, jovem desenvolvedor angolano 
+                    de 20 anos, estudante da prestigiada <strong>42 Luanda</strong>. Apaixonado por 
+                    tecnologia e inovação, dedico-me ao desenvolvimento de soluções tecnológicas 
+                    que possam impactar positivamente a comunidade angolana e africana.
+                </p>
+                <p>
+                    Este website faz parte do projeto <strong>Inception</strong>, onde demonstro 
+                    competências em arquitetura de sistemas, containerização e desenvolvimento 
+                    full-stack utilizando tecnologias modernas.
+                </p>
+            </section>
+
+            <section class="journey">
+                <h2>🌍 Jornada em Angola</h2>
+                <p>
+                    Como estudante da <strong>42 Luanda</strong>, faço parte de uma nova geração 
+                    de desenvolvedores africanos que estão a moldar o futuro tecnológico do continente. 
+                    A metodologia peer-to-peer da 42 permite-me crescer não apenas tecnicamente, 
+                    mas também como pessoa, desenvolvendo soft skills essenciais.
+                </p>
+                <div class="achievements">
+                    <div class="achievement-item">🏆 Projeto Inception - Infraestrutura Completa</div>
+                    <div class="achievement-item">🐳 Especialização em Docker & Containerização</div>
+                    <div class="achievement-item">🌐 Desenvolvimento Web Full-Stack</div>
+                    <div class="achievement-item">🤝 Liderança e Trabalho em Equipa</div>
+                </div>
+            </section>
+
+            <section class="skills">
+                <h2>🛠️ Tecnologias</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">🐳 Docker</div>
+                    <div class="tech-item">🌐 Nginx</div>
+                    <div class="tech-item">⚡ Node.js</div>
+                    <div class="tech-item">🗄️ MariaDB</div>
+                    <div class="tech-item">📝 WordPress</div>
+                    <div class="tech-item">🔧 PHP-FPM</div>
+                </div>
+            </section>
+
+            <section class="project">
+                <h2>📦 Projeto Inception - Sistema Completo</h2>
+                <p>
+                    Este projeto demonstra a implementação de uma infraestrutura web robusta 
+                    e escalável, utilizando as melhores práticas de DevOps e arquitetura 
+                    de microsserviços. Desenvolvido integralmente por mim, Eliandro Faustino, 
+                    como parte do currículo da 42 Luanda.
+                </p>
+                <ul>
+                    <li>✅ <strong>Nginx</strong> - Servidor web, proxy reverso e load balancer</li>
+                    <li>✅ <strong>WordPress</strong> - CMS dinâmico com PHP-FPM otimizado</li>
+                    <li>✅ <strong>MariaDB</strong> - Base de dados relacional performante</li>
+                    <li>✅ <strong>Adminer</strong> - Interface web para administração da BD</li>
+                    <li>✅ <strong>Website Node.js</strong> - Esta página (meu portfolio)</li>
+                    <li>✅ <strong>Docker Compose</strong> - Orquestração de containers</li>
+                    <li>✅ <strong>SSL/TLS</strong> - Segurança e encriptação end-to-end</li>
+                </ul>
+            </section>
+
+            <section class="links">
+                <h2>🔗 Links Úteis</h2>
+                <div class="link-grid">
+                    <a href="/" class="link-btn">🏠 WordPress</a>
+                    <a href="/adminer/" class="link-btn">🗄️ Adminer</a>
+                    <a href="/website/" class="link-btn active">🌐 Website</a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>
+                🇦🇴 <strong>Eliandro Sérgio Francisco Faustino</strong><br>
+                🎓 42 Luanda, Angola | 📅 3 de Outubro, 2004<br>
+                💻 Desenvolvido com paixão usando Docker, Node.js & Nginx
+            </p>
+            <div class="status">
+                <span id="status">🟢 Sistema Online</span>
+            </div>
+            <div class="quote">
+                <em>"A tecnologia é a ponte que une sonhos à realidade. 🌍✨"</em>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Verificar status do sistema
+        fetch('/website/health')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = '🟢 Sistema Online - ' + 
+                    new Date().toLocaleTimeString('pt-BR');
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = '🔴 Sistema Offline';
+            });
+    </script>
+</body>
+</html>

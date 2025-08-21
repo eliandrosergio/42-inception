@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explicação do www.conf e run.sh</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .section {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .code {
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-left: 4px solid #3498db;
+      margin: 10px 0;
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Explicação do www.conf e run.sh</h1>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do www.conf</h2>
+    <div class="code">
+[www]
+user  = www-data
+group = www-data
+listen = 0.0.0.0:9000
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+    </div>
+    <ul>
+      <li><strong>[www]</strong>: Define o pool de processos chamado "www" no PHP-FPM, que será usado para processar solicitações do WordPress.</li>
+      <li><strong>user = www-data</strong>: Especifica que o usuário "www-data" executará os processos do PHP-FPM, alinhando-se com as permissões padrão do sistema para servidores web.</li>
+      <li><strong>group = www-data</strong>: Define o grupo "www-data" para os processos, garantindo consistência com o usuário e evitando problemas de acesso a arquivos.</li>
+      <li><strong>listen = 0.0.0.0:9000</strong>: Configura o PHP-FPM para escutar em todas as interfaces de rede (0.0.0.0) na porta 9000, permitindo que o NGINX se conecte a esse ponto para processar solicitações PHP.</li>
+      <li><strong>listen.owner = www-data</strong>: Define o proprietário do socket ou porta como "www-data", garantindo que o NGINX tenha permissão para acessá-lo.</li>
+      <li><strong>listen.group = www-data</strong>: Define o grupo do socket ou porta como "www-data", reforçando a segurança e a compatibilidade com o usuário configurado.</li>
+      <li><strong>pm = dynamic</strong>: Define o modo de gerenciamento de processos como dinâmico, permitindo que o PHP-FPM ajuste o número de processos com base na demanda.</li>
+      <li><strong>pm.max_children = 5</strong>: Limita o número máximo de processos filhos para 5, controlando o uso de recursos do contêiner.</li>
+      <li><strong>pm.start_servers = 2</strong>: Inicia 2 processos servidores ao iniciar o PHP-FPM, oferecendo um ponto de partida para lidar com solicitações.</li>
+      <li><strong>pm.min_spare_servers = 1</strong>: Mantém pelo menos 1 processo ocioso disponível para responder rapidamente a novas solicitações.</li>
+      <li><strong>pm.max_spare_servers = 3</strong>: Limita o número máximo de processos ociosos a 3, otimizando o uso de memória.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Estrutura e Explicação do run.sh</h2>
+    <div class="code">
+#!/bin/sh
+
+if [ -f "/var/www/wordpress/wp-config.php" ]
+then
+  echo "✅ Wordpress já se encontra configurado."
+else
+  # Lendo as senhas dos secrets
+  DB_PASS=$(cat /run/secrets/db_password)
+  WP_PASS=$(grep '^WP_PASS=' /run/secrets/credentials | cut -d'=' -f2-)
+  WP_PASS2=$(grep '^WP_PASS2=' /run/secrets/credentials | cut -d'=' -f2-)
+
+  # Instalação e configuração do WordPress
+  wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  chmod +x wp-cli.phar
+  mv wp-cli.phar /usr/local/bin/wp
+  
+  wp core download --path=/var/www/wordpress --locale=pt_BR --allow-root
+  wp config create --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=mariadb --path=/var/www/wordpress --skip-check --allow-root
+  wp core install --path=/var/www/wordpress --url=$DOMAIN_NAME --title="$WP_TITLE" --admin_user=$WP_USER --admin_password=$WP_PASS --admin_email=$WP_EMAIL --skip-email --allow-root
+  wp theme install teluro --path=/var/www/wordpress --activate --allow-root
+  wp user create $WP_USER2 $WP_EMAIL2 --role=author --path=/var/www/wordpress --user_pass=$WP_PASS2 --allow-root
+fi
+
+/usr/sbin/php-fpm8.2 -F
+    </div>
+    <ul>
+      <li><strong>#!/bin/sh</strong>: Define o interpretador de shell (sh) para executar o script, garantindo compatibilidade no contêiner Debian.</li>
+      <li><strong>if [ -f "/var/www/wordpress/wp-config.php" ]</strong>: Verifica se o arquivo de configuração do WordPress já existe, evitando reinstalação desnecessária.</li>
+      <li><strong>then echo "✅ Wordpress já se encontra configurado."</strong>: Exibe uma mensagem de confirmação se o WordPress já estiver configurado.</li>
+      <li><strong>else</strong>: Inicia o bloco de instalação caso o WordPress ainda não esteja configurado.</li>
+      <li><strong>DB_PASS=$(cat /run/secrets/db_password)</strong>: Lê a senha do banco de dados a partir de um arquivo de segredos, conforme recomendado pelo subject (página 8).</li>
+      <li><strong>WP_PASS=$(...) e WP_PASS2=$(...)</strong>: Extrai senhas de usuário do WordPress a partir do arquivo de credenciais, mantendo segredos fora do código.</li>
+      <li><strong>wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar</strong>: Baixa o WP-CLI, uma ferramenta de linha de comando para gerenciar o WordPress.</li>
+      <li><strong>chmod +x wp-cli.phar</strong>: Torna o WP-CLI executável.</li>
+      <li><strong>mv wp-cli.phar /usr/local/bin/wp</strong>: Move o WP-CLI para um diretório no PATH, facilitando seu uso.</li>
+      <li><strong>wp core download --path=/var/www/wordpress --locale=pt_BR --allow-root</strong>: Baixa os arquivos do WordPress na pasta especificada, com localização em português, permitindo execução como root.</li>
+      <li><strong>wp config create ...</strong>: Cria o arquivo wp-config.php com as credenciais do banco de dados MariaDB (dbhost=mariadb), pulando verificações.</li>
+      <li><strong>wp core install ...</strong>: Instala o WordPress com título, usuário administrador, senha e e-mail, pulando e-mails de notificação.</li>
+      <li><strong>wp theme install teluro --path=/var/www/wordpress --activate --allow-root</strong>: Instala e ativa o tema "teluro" no WordPress.</li>
+      <li><strong>wp user create ...</strong>: Cria um segundo usuário com papel de autor, usando senha e e-mail fornecidos.</li>
+      <li><strong>/usr/sbin/php-fpm8.2 -F</strong>: Inicia o PHP-FPM em foreground (-F), mantendo o contêiner ativo como PID 1, evitando loops infinitos conforme proibido (página 8).</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Integração com NGINX e MariaDB</h2>
+    <ul>
+      <li>O PHP-FPM no contêiner WordPress processa solicitações PHP enviadas pelo NGINX (porta 9000, conforme www.conf), que atua como ponto de entrada (página 8) com TLSv1.2/TLSv1.3.</li>
+      <li>O NGINX redireciona solicitações .php para o PHP-FPM via FastCGI, usando o socket/porta 9000, enquanto serve arquivos estáticos diretamente.</li>
+      <li>O run.sh configura o WordPress para se conectar ao contêiner MariaDB (dbhost=mariadb) via uma rede Docker personalizada, sem usar <code>network: host</code> ou <code>--link</code> (página 8).</li>
+    </ul>
+  </div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações Alteradas no nginx.conf</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .section {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Configurações Alteradas no nginx.conf</h1>
+
+  <div class="section">
+    <h2>Alterações Realizadas</h2>
+    <table>
+      <tr>
+        <th>Linha Alterada</th>
+        <th>Padrão</th>
+        <th>Como Era Antes</th>
+        <th>Alterou Para</th>
+        <th>Por Que Alterou</th>
+        <th>O Que Muda em Comparação ao Padrão</th>
+      </tr>
+      <tr>
+        <td>## Basic Confs ##</td>
+        <td>Não presente</td>
+        <td>Sem comentário</td>
+        <td>## Basic Confs ##</td>
+        <td>Adicionado para organizar as configurações básicas e facilitar a leitura.</td>
+        <td>Melhora a legibilidade e manutenção do arquivo, sem impacto funcional.</td>
+      </tr>
+      <tr>
+        <td>server_tokens off;</td>
+        <td>Não presente (server_tokens on por padrão)</td>
+        <td>server_tokens on</td>
+        <td>server_tokens off</td>
+        <td>Para ocultar a versão do NGINX, aumentando a segurança contra ataques direcionados.</td>
+        <td>Impede que hackers identifiquem a versão do servidor, reduzindo vulnerabilidades exploráveis.</td>
+      </tr>
+      <tr>
+        <td>## SSL Confs ##</td>
+        <td>Não presente</td>
+        <td>Sem comentário</td>
+        <td>## SSL Confs ##</td>
+        <td>Adicionado para separar e organizar configurações de SSL/TLS.</td>
+        <td>Melhora a legibilidade, sem impacto funcional.</td>
+      </tr>
+      <tr>
+        <td>ssl_protocols TLSv1.2 TLSv1.3;</td>
+        <td>Não presente (inclui TLSv1, TLSv1.1 por padrão)</td>
+        <td>ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3</td>
+        <td>ssl_protocols TLSv1.2 TLSv1.3</td>
+        <td>Para atender ao requisito de segurança do subject (página 8), desativando protocolos obsoletos.</td>
+        <td>Remove suporte a TLSv1 e TLSv1.1, reduzindo riscos de ataques e melhorando a conformidade.</td>
+      </tr>
+      <tr>
+        <td>ssl_prefer_server_ciphers on;</td>
+        <td>Não presente (off por padrão)</td>
+        <td>ssl_prefer_server_ciphers off</td>
+        <td>ssl_prefer_server_ciphers on</td>
+        <td>Para priorizar cifras do servidor, garantindo maior controle sobre a segurança.</td>
+        <td>Garante que o servidor escolha as cifras mais seguras, em vez de depender do cliente.</td>
+      </tr>
+      <tr>
+        <td>ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;</td>
+        <td>Não presente (cifras padrão menos restritivas)</td>
+        <td>Cifras padrão como AES128-SHA, etc.</td>
+        <td>Lista específica de cifras seguras</td>
+        <td>Para usar apenas cifras modernas e seguras, atendendo a padrões de criptografia avançada.</td>
+        <td>Aumenta a segurança ao limitar a cifras fortes, rejeitando as mais antigas e vulneráveis.</td>
+      </tr>
+      <tr>
+        <td>ssl_ecdh_curve secp384r1;</td>
+        <td>Não presente (curva padrão como prime256v1)</td>
+        <td>ssl_ecdh_curve prime256v1</td>
+        <td>ssl_ecdh_curve secp384r1</td>
+        <td>Para usar uma curva elíptica mais segura e robusta.</td>
+        <td>Melhora a segurança criptográfica, usando uma curva com maior resistência a ataques.</td>
+      </tr>
+      <tr>
+        <td>ssl_session_timeout 10m;</td>
+        <td>Não presente (5m por padrão)</td>
+        <td>ssl_session_timeout 5m</td>
+        <td>ssl_session_timeout 10m</td>
+        <td>Para aumentar o tempo de reutilização de sessões, melhorando o desempenho.</td>
+        <td>Reduz a sobrecarga de renegociação SSL, mas pode manter sessões por mais tempo.</td>
+      </tr>
+      <tr>
+        <td>ssl_session_cache shared:SSL:10m;</td>
+        <td>Não presente (sem cache ou tamanho menor)</td>
+        <td>Sem cache ou cache menor</td>
+        <td>ssl_session_cache shared:SSL:10m</td>
+        <td>Para armazenar sessões em cache, otimizando conexões repetidas.</td>
+        <td>Melhora o desempenho ao evitar renegociações frequentes, com 10 MB de cache.</td>
+      </tr>
+      <tr>
+        <td>ssl_session_tickets off;</td>
+        <td>Não presente (on por padrão)</td>
+        <td>ssl_session_tickets on</td>
+        <td>ssl_session_tickets off</td>
+        <td>Para desativar tickets de sessão, evitando ataques de reutilização.</td>
+        <td>Aumenta a segurança ao eliminar um vetor de ataque, embora possa impactar o desempenho.</td>
+      </tr>
+      <tr>
+        <td>add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";</td>
+        <td>Não presente</td>
+        <td>Sem HSTS</td>
+        <td>Adiciona HSTS por 2 anos</td>
+        <td>Para forçar o uso de HTTPS e proteger contra redirecionamentos HTTP.</td>
+        <td>Garante conexões seguras por 2 anos, com suporte a subdomínios e pré-carregamento.</td>
+      </tr>
+      <tr>
+        <td>add_header X-Frame-Options DENY;</td>
+        <td>Não presente</td>
+        <td>Sem proteção de iframe</td>
+        <td>X-Frame-Options DENY</td>
+        <td>Para prevenir ataques de cliquejacking ao bloquear iframes.</td>
+        <td>Impede que a página seja embutida em iframes, aumentando a segurança.</td>
+      </tr>
+      <tr>
+        <td>add_header X-Content-Type-Options nosniff;</td>
+        <td>Não presente</td>
+        <td>Sem restrição de MIME</td>
+        <td>X-Content-Type-Options nosniff</td>
+        <td>Para evitar que navegadores adivinhem tipos MIME, reduzindo riscos.</td>
+        <td>Previne ataques baseados em MIME sniffing, como XSS.</td>
+      </tr>
+      <tr>
+        <td>add_header X-XSS-Protection "1; mode=block";</td>
+        <td>Não presente</td>
+        <td>Sem proteção XSS</td>
+        <td>X-XSS-Protection "1; mode=block"</td>
+        <td>Para ativar proteção contra ataques de script cross-site.</td>
+        <td>Bloqueia páginas com scripts maliciosos, melhorando a segurança do cliente.</td>
+      </tr>
+      <tr>
+        <td>## Logging Confs ##</td>
+        <td>Não presente</td>
+        <td>Sem comentário</td>
+        <td>## Logging Confs ##</td>
+        <td>Adicionado para organizar as configurações de log.</td>
+        <td>Melhora a legibilidade, sem impacto funcional.</td>
+      </tr>
+      <tr>
+        <td>## Gzip Confs ##</td>
+        <td>Não presente</td>
+        <td>Sem comentário</td>
+        <td>## Gzip Confs ##</td>
+        <td>Adicionado para organizar configurações de compressão.</td>
+        <td>Melhora a legibilidade, sem impacto funcional.</td>
+      </tr>
+      <tr>
+        <td>gzip on;</td>
+        <td>Não presente (off por padrão)</td>
+        <td>gzip off</td>
+        <td>gzip on</td>
+        <td>Para comprimir respostas, reduzindo o uso de largura de banda.</td>
+        <td>Acelera o carregamento de páginas ao reduzir o tamanho dos dados transferidos.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
