@@ -4,7 +4,7 @@
 
 ## 📋 Sobre o Projeto
 
-O **Inception** é um projeto da escola 42 que visa aprofundar conhecimentos em administração de sistemas através da tecnologia Docker. O desafio consiste em criar uma infraestrutura completa virtualizada usando containers Docker, implementando as melhores práticas de segurança e arquitetura.
+O **Inception** é um projeto da escola **42 Luanda** que visa aprofundar conhecimentos em administração de sistemas através da tecnologia Docker. O desafio consiste em criar uma infraestrutura completa virtualizada usando containers Docker, implementando as melhores práticas de segurança e arquitetura.
 
 ### 🎯 Objetivo Principal
 Construir uma aplicação web completa usando **apenas containers Docker customizados**, sem usar imagens pré-construídas do DockerHub (exceto Alpine/Debian base).
@@ -18,6 +18,19 @@ Construir uma aplicação web completa usando **apenas containers Docker customi
 │   Port: 443     │    │   Port: 9000    │    │   Port: 3306    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
+         ├───────────────────────┼───────────────────────┤
+         │              ┌─────────────────┐              │
+         │              │   ADMINER       │              │
+         │              │  (DB Admin)     │              │
+         │              │  Port: 9001     │              │
+         │              └─────────────────┘              │
+         │                       │                       │
+         │              ┌─────────────────┐              │
+         │              │   WEBSITE       │              │
+         │              │  (Node.js)      │              │
+         │              │  Port: 3000     │              │
+         │              └─────────────────┘              │
+         │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  │
                     ┌─────────────────┐
@@ -29,57 +42,65 @@ Construir uma aplicação web completa usando **apenas containers Docker customi
 ## 🔧 Componentes Implementados
 
 ### 🌐 **NGINX Container**
-- **Base**: Debian Bullseye Slim
+- **Base**: Debian Bookworm Slim
 - **Função**: Proxy reverso e terminação SSL
 - **Características**:
   - Suporte **exclusivo** a TLS 1.2/1.3
   - Certificados SSL auto-assinados
-  - Redirecionamento HTTP → HTTPS
+  - Único ponto de entrada (porta 443)
+  - Proxy reverso para Adminer e Website
   - Headers de segurança implementados
   - Configuração otimizada para PHP-FPM
 
 ### 🌍 **WordPress Container**
-- **Base**: Debian Bullseye Slim
+- **Base**: Debian Bookworm Slim
 - **Função**: CMS e aplicação web
 - **Características**:
-  - PHP 7.4 com FPM
+  - PHP 8.2 com FPM
   - WordPress CLI (wp-cli) para automação
   - Configuração automática na inicialização
   - Tema personalizado (Teluro)
-  - **Dois usuários**: Admin + Author
+  - **Dois usuários**: Admin (edit_efaustin) + Author (edit_bivanio)
 
 ### 🗄️ **MariaDB Container**
-- **Base**: Debian Bullseye Slim
+- **Base**: Debian Bookworm Slim
 - **Função**: Sistema de gerenciamento de banco de dados
 - **Características**:
-  - Configuração automática do banco
-  - Usuário dedicado para WordPress
+  - Configuração automática do banco WordPress
+  - Usuário dedicado (efaustin) para WordPress
   - Persistência de dados via volumes
   - Configuração de segurança implementada
+  - Uso de Docker Secrets para senhas
 
-### 🛢️ **Adminer Container**
-- **Base**: Alpine
+### 🛠️ **Adminer Container (Bonus)**
+- **Base**: Debian Bookworm Slim
 - **Função**: Interface web para gerenciamento do MariaDB
 - **Características**:
+  - PHP 8.2 com FPM na porta 9001
   - Interface leve e intuitiva
-  - Conexão direta com o banco MariaDB
-  - Roda sob proxy do NGINX em HTTPS
-  - Útil para debugging e acesso manual ao banco
+  - Acessível via **https://efaustin.42.fr/adminer/**
+  - Conexão direta com MariaDB
+  - Container isolado sem portas expostas
 
-### 🎮 **Game Website Container**
-- **Base**: Debian Bullseye Slim
-- **Função**: Hospedagem de um jogo de tiro ao alvo em HTML/CSS/JS com Node.js
+### 🌐 **Website Portfolio Container (Bonus)**
+- **Base**: Debian Bookworm Slim
+- **Função**: Portfolio pessoal em Node.js
 - **Características**:
-  - Servidor Node.js leve (porta interna 4444)
-  - Conteúdo estático e responsivo
-  - Acesso via proxy seguro (NGINX)
-  - Volume dedicado para arquivos do jogo
+  - Servidor Node.js + Express na porta 3000
+  - Website responsivo com HTML/CSS/JS
+  - Portfolio de Eliandro Sérgio Francisco Faustino
+  - Acessível via **https://efaustin.42.fr/website/**
+  - Volume persistente para arquivos
 
 ## 📂 Estrutura do Projeto
 
 ```
 inception/
 ├── Makefile                          # Automação do projeto
+├── secrets/                          # Docker secrets (credenciais)
+│   ├── credentials.txt
+│   ├── db_password.txt
+│   └── db_root_password.txt
 ├── srcs/
 │   ├── docker-compose.yml            # Orquestração dos containers
 │   ├── .env                          # Variáveis de ambiente
@@ -105,72 +126,76 @@ inception/
 │       │    └── tools/
 │       │        └── run.sh
 │       └── bonus/
-│           ├── adminer
-│           │   ├── Dockerfile/
+│           ├── adminer/
+│           │   ├── Dockerfile
+│           │   ├── conf/
+│           │   │   └── www.conf
 │           │   └── tools/
-│           │       └── script.sh
-│           └── website
-│               ├── Dockerfile/
+│           │       └── run.sh
+│           └── website/
+│               ├── Dockerfile
 │               └── tools/
 │                   ├── server.js
-│                   └── public/       # Arquivos do jogo
-└── data/                             # Volumes persistentes
+│                   ├── index.html
+│                   ├── style.css
+│                   ├── package.json
+│                   └── run.sh
+└── /home/efaustin/data/               # Volumes persistentes
     ├── mariadb/
-    └── wordpress/
+    ├── wordpress/
+    └── website/
 ```
 
 ## 🛠️ Tecnologias e Conceitos Aplicados
 
 ### 🐳 **Docker & Container Technology**
 - **Dockerfiles customizados** para cada serviço
-- **Multi-stage builds** para otimização
+- **Docker Compose** para orquestração
 - **Container networking** com bridge driver
 - **Volume management** para persistência
+- **Docker Secrets** para credenciais seguras
 - **Security best practices** implementadas
 
 ### 🔒 **Segurança**
 - **SSL/TLS exclusivo** (1.2/1.3)
-- **Environment variables** para credenciais
+- **Docker Secrets** para credenciais sensíveis
 - **Non-root users** nos containers
 - **Network isolation** entre serviços
-- **Security headers** configurados
+- **Security headers** configurados no nginx
+- **Único ponto de entrada** via nginx (porta 443)
 
 ### ⚙️ **Automação e DevOps**
-- **Docker Compose** para orquestração
-- **Makefile** para automação de comandos
+- **Docker Compose v3.3** para orquestração
+- **Makefile** completo para automação
 - **Health checks** e restart policies
 - **Logs centralizados** e monitoramento
+- **Volume bind mounts** para persistência
 
-### 🗃️ **Banco de Dados**
-- Interface de administração com Adminer
-- Uso de volumes persistentes
-- Segurança com variáveis de ambiente e rede isolada
-
-### 🕹️ **Web App Estático com Node.js**
-- Servidor Node.js para conteúdo estático
-- Integração com Docker e proxy reverso
-- Jogo desenvolvido em HTML/CSS/JS puro
+### 🌐 **Web Services**
+- **Proxy Reverso** nginx para múltiplos serviços
+- **PHP-FPM** otimizado para WordPress
+- **Node.js + Express** para website estático
+- **FastCGI** para Adminer
 
 ## 🚀 Como Usar
 
 ### Pré-requisitos
 ```bash
-# Docker e Docker Compose instalados
+# Docker e Docker Compose v2 instalados
 docker --version
-docker-compose --version
+docker compose version  # Note: sem hífen (v2)
 ```
 
 ### Configuração
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/eliandrosergio/42-inception.git
-cd 42-inception/my01
+git clone <seu-repositorio>
+cd inception
 
 # 2. Configure o domínio no /etc/hosts
 echo "127.0.0.1 efaustin.42.fr" | sudo tee -a /etc/hosts
 
-# 3. Crie os diretórios de dados
-mkdir -p /home/elian/data/{mariadb,wordpress}
+# 3. Os diretórios de dados são criados automaticamente pelo Makefile
 ```
 
 ### Execução
@@ -179,71 +204,90 @@ mkdir -p /home/elian/data/{mariadb,wordpress}
 make all
 
 # Ou comandos individuais
-make build    # Construir imagens
-make up       # Iniciar containers
-make down     # Parar containers
-make re       # Reconstruir tudo
-make logs     # Ver logs
+make build       # Construir imagens
+make up          # Iniciar containers
+make down        # Parar containers
+make re          # Reconstruir tudo
+make logs        # Ver logs de todos os serviços
+make status      # Ver status dos containers
+make deepclean   # Limpeza completa
 ```
 
 ### Acesso
-- **Website**: https://efaustin.42.fr
+- **WordPress**: https://efaustin.42.fr
 - **WordPress Admin**: https://efaustin.42.fr/wp-admin
-- **Adminer**: https://efaustin.42.fr:600
-- **Game Website**: https://efaustin.42.fr:4444
+  - **Admin**: `edit_efaustin` / `edit_efaustin2004`
+  - **Author**: `edit_bivanio` / `user_bivanio2010`
+- **Adminer**: https://efaustin.42.fr/adminer/
+- **Portfolio**: https://efaustin.42.fr/website/
 
 ## 📚 Recursos e Referências
 
 ### 🐳 **Docker & Containerization**
 - [Docker Documentation](https://docs.docker.com/reference/) - Documentação oficial
 - [Docker Compose Guide](https://docs.docker.com/compose/) - Orquestração de containers
-- [Dockerfile Best Practices](https://sysdig.com/blog/dockerfile-best-practices/) - Práticas recomendadas
-- [Container Security](https://docs.docker.com/engine/security/rootless/) - Segurança em containers
+- [Dockerfile Best Practices](https://docs.docker.com/develop/dev-best-practices/) - Práticas recomendadas
+- [Docker Secrets](https://docs.docker.com/engine/swarm/secrets/) - Gerenciamento seguro de credenciais
 
 ### 🌐 **Web Services**
-- [NGINX Configuration](https://www.nginx.com/resources/wiki/start/topics/examples/full/) - Configuração avançada
-- [WordPress CLI](https://developer.wordpress.org/cli/commands/) - Automação WordPress
-- [PHP-FPM Configuration](https://gist.github.com/lidaobing/673798) - Configuração PHP-FPM
+- [NGINX Configuration](https://nginx.org/en/docs/) - Documentação oficial nginx
+- [WordPress CLI](https://wp-cli.org/) - Automação WordPress
+- [PHP-FPM Configuration](https://www.php.net/manual/en/install.fpm.php) - Configuração PHP-FPM
 - [MariaDB Docker](https://mariadb.com/kb/en/installing-and-using-mariadb-via-docker/) - Banco de dados
+- [Node.js & Express](https://expressjs.com/) - Framework web Node.js
 
 ### 🔧 **DevOps & Architecture**
-- [Container Networking](https://iximiuz.com/en/posts/container-networking-is-simple/) - Redes Docker
-- [Docker Anti-patterns](https://jpetazzo.github.io/2021/11/30/docker-build-container-images-antipatterns/) - O que evitar
-- [PID 1 Problem](https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/) - Processos em containers
+- [Container Networking](https://docs.docker.com/network/) - Redes Docker
+- [Docker Volumes](https://docs.docker.com/storage/volumes/) - Persistência de dados
+- [SSL/TLS Best Practices](https://ssl-config.mozilla.org/) - Configuração SSL
 
 ## 💡 Pontos-Chave do Projeto
 
 ### 🎯 **Desafios Superados**
 1. **Networking**: Comunicação entre containers via rede isolada
 2. **Persistência**: Volumes compartilhados entre host e containers
-3. **Segurança**: SSL/TLS, usuarios não-root, variáveis de ambiente
-4. **Automação**: Scripts de inicialização e configuração automática
-5. **Performance**: Otimização de imagens e configurações
+3. **Segurança**: SSL/TLS, Docker Secrets, usuários não-root
+4. **Proxy Reverso**: nginx roteando múltiplos serviços
+5. **Automação**: Scripts de inicialização e configuração automática
 
 ### 🏆 **Boas Práticas Implementadas**
 - ✅ **Separation of Concerns**: Cada serviço em seu próprio container
-- ✅ **Immutable Infrastructure**: Containers rebuilding para mudanças
-- ✅ **Configuration Management**: Environment variables e arquivos de config
+- ✅ **Single Entry Point**: nginx como único ponto de entrada
+- ✅ **Configuration Management**: Environment variables e Docker Secrets
 - ✅ **Security First**: Princípio do menor privilégio aplicado
-- ✅ **Monitoring**: Logs e health checks implementados
+- ✅ **Monitoring**: Logs estruturados e health checks
+- ✅ **Clean Architecture**: Containers sem portas expostas desnecessárias
 
-## 📈 Possíveis Melhorias (Bonus)
+## 🎓 Requisitos do Subject Atendidos
 
-- 🔄 **Redis Cache** - Cache para WordPress (bonus)
-- 📁 **FTP Server** - Acesso aos arquivos (bonus)
-- 📊 **Monitoring** - Prometheus/Grafana (bonus extra)
-- 🛡️ **Fail2Ban** - Proteção contra tentativas de login maliciosas (bonus extra)
+### ✅ **Mandatory Part**
+- ✅ Nginx container com TLSv1.2/1.3 apenas
+- ✅ WordPress + PHP-FPM (sem nginx)
+- ✅ MariaDB (sem nginx)
+- ✅ Volumes para database e website files
+- ✅ Docker network conectando containers
+- ✅ Containers reiniciam automaticamente
+- ✅ Domínio efaustin.42.fr configurado
+- ✅ Nginx único ponto de entrada (porta 443)
+- ✅ Docker Secrets para senhas
+- ✅ Usuários database sem nomes 'admin'
 
-## 🤝 Contribuições
+### ✅ **Bonus Part**
+- ✅ **Adminer**: Interface web para database
+- ✅ **Website estático**: Portfolio em Node.js (não PHP)
+- ✅ Cada serviço bonus em container próprio
+- ✅ Volumes dedicados quando necessário
 
-Este projeto faz parte do currículo da **Escola 42** e tem fins educacionais. Contribuições e melhorias são bem-vindas!
+## 🇦🇴 Desenvolvido por
 
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+**Eliandro Sérgio Francisco Faustino**
+- 📅 Nascido em 3 de Outubro de 2004
+- 🎓 Estudante da **42 Luanda**, Angola
+- 📧 eliandrosergio42@gmail.com
+- 🌍 Luanda, Angola
 
 ---
 
-**Desenvolvido por [Eliandro Sérgio](https://github.com/eliandrosergio) - 42 Student**
+> *"A tecnologia é a ponte que une sonhos à realidade. 🌍✨"*
 
-> *"O conhecimento é a única coisa que cresce quando compartilhada"*
+**Projeto desenvolvido como parte do currículo da 42 School**
